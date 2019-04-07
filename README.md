@@ -22,7 +22,7 @@ Languages:	1 - English.
 		
 		
 	
-* Atenção: Todas formas de atualizações precisa que o ESP32 tenha o esquema de partições OTA definido nas preferências da placa.
+* Atenção: Todas formas de atualizações precisam que o ESP32 tenha o esquema de partições com OTA definido nas preferências da placa.
 
 
 
