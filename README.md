@@ -20,8 +20,9 @@ Languages:	1 - English.
 		* GSM (SIM 800, SIM 900, A6).
 		* LoRa.
 		
+		
 	
-Atenção: Todas formas de atualizações precisa que o ESP32 tenha o esquema de partições OTA definido nas preferências da placa.
+* Atenção: Todas formas de atualizações precisa que o ESP32 tenha o esquema de partições OTA definido nas preferências da placa.
 
 
 
@@ -32,7 +33,7 @@ Atenção: Todas formas de atualizações precisa que o ESP32 tenha o esquema de
 	
 	* 1. Crie o objeto da biblioteca.
 	* 2. Inicie o WiFi em STA ou AP.
-	* 3. Inicialize o OTA com a função `ota.init()` apenas uma vez, não inicialize mais de uma vez no mesmo código!!!
+	* 3. Inicialize o OTA com a função `ota.init()` apenas uma vez, não coloque em loop.
 	* 4. A partir deste momento, a biblioteca já esta monitorando a porta 22180 esperando o binário ser enviado para efetuar o download e update.
 	
 	
@@ -45,6 +46,6 @@ Atenção: Todas formas de atualizações precisa que o ESP32 tenha o esquema de
 	
 	* 1. Crie o objeto da biblioteca.
 	* 2. Inicie o WiFi em STA ou AP.
-	* 3. Inicialize o OTA com a função `ota.init(key)` e insira sua chave de 16 caracteres no parâmetro da função. Faça isso apenas uma vez, não inicialize mais de uma vez!
+	* 3. Inicialize o OTA com a função `ota.init(key)` e insira sua chave de 16 caracteres no parâmetro da função. Faça isso apenas uma vez, não coloque em loop.
 	* 4. A partir deste momento, a biblioteca já esta monitorando a porta 22180 esperando o binário criptografado ser enviado para efetuar o download e update.
 	
