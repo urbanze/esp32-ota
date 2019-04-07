@@ -46,6 +46,6 @@ Languages:	1 - English.
 	
 	* 1. Crie o objeto da biblioteca.
 	* 2. Inicie o WiFi em STA ou AP.
-	* 3. Inicialize o OTA com a função `ota.init(key)` e insira sua chave de 16 caracteres no parâmetro da função. Faça isso apenas uma vez, não coloque em loop.
+	* 3. Inicialize o OTA com a função `ota.init(char key[])` e insira sua chave de 16 caracteres no parâmetro da função. Faça isso apenas uma vez, não coloque em loop.
 	* 4. A partir deste momento, a biblioteca já esta monitorando a porta 22180 esperando o binário criptografado ser enviado para efetuar o download e update.
 	
