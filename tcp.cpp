@@ -1,11 +1,11 @@
 #include "tcp.h"
 
-int8_t _crypted;
+int8_t _crypted = 0, exc = 0;
 uint8_t _key[16];
 
 void t_ota(void*z)
 {
-
+    exc = 1;
     char tag[16];
     if (_crypted)
         {strcpy(tag, "OTA_TCP Crypted");}
@@ -47,13 +47,13 @@ void t_ota(void*z)
             continue;
         }
 
-        tcp.printf("Connected, downloading...\n");
+        tcp.printf("ESP32: Connected, downloading...\n");
         ESP_LOGW(tag, "Client connected, downloading update");
         update_partition = esp_ota_get_next_update_partition(NULL);
         err = esp_ota_begin(update_partition, OTA_SIZE_UNKNOWN, &update_handle);
         if (err != ESP_OK)
         {
-            tcp.printf("Fail[1]:%x, restarting...\n", err);
+            tcp.printf("ESP32: Fail[1]:%x, restarting...\n", err);
             ESP_LOGE(tag, "Fail[1]:%x, restarting...", err);
             tcp.stop();
             vTaskDelay(pdMS_TO_TICKS(2000));
@@ -70,7 +70,7 @@ void t_ota(void*z)
             t2 = esp_timer_get_time();
             if (t2 - t1 > 3000000)
             {
-                tcp.printf("Client timeout\n");
+                tcp.printf("ESP32: Client timeout\n");
                 ESP_LOGW(tag, "Client timeout");
                 break;
             }
@@ -111,7 +111,7 @@ void t_ota(void*z)
                 err = esp_ota_write(update_handle, data, avl);
 				if (err != ESP_OK)
                 {
-                    tcp.printf("Fail[2]:%x\n", err);
+                    tcp.printf("ESP32: Fail[2]:%x\n", err);
                     ESP_LOGE(tag, "Fail[2]:%x", err);
                     tcp.stop();
                     break;
@@ -131,7 +131,7 @@ void t_ota(void*z)
             err = esp_ota_set_boot_partition(update_partition);
             if (err == ESP_OK)
             {
-                tcp.printf("Update sucess! Restarting...\n");
+                tcp.printf("ESP32: Update sucess! Restarting...\n");
                 ESP_LOGI(tag, "Update sucess! Restarting...");
                 tcp.stop();
                 vTaskDelay(pdMS_TO_TICKS(2000));
@@ -139,19 +139,21 @@ void t_ota(void*z)
             }
             else
             {
-                tcp.printf("Fail[4]:%x\n", err);
+                tcp.printf("ESP32: Fail[4]:%x\n", err);
                 ESP_LOGE(tag, "Fail[4]:%x", err);
             }
         }
         else
         {
-            tcp.printf("Fail[3]:%x\n", err);
+            tcp.printf("ESP32: Fail[3]:%x\n", err);
             ESP_LOGE(tag, "Fail[3]:%x", err);
         }
 
         tcp.stop();
     }
 
+    ESP_LOGW(tag, "Task deleted");
+    exc = 0;
     vTaskDelete(NULL);
 }
 
@@ -160,6 +162,12 @@ void t_ota(void*z)
 
 void OTA_TCP::init()
 {
+    const char tag[] = "OTA_TCP";
+    
+    if (exc)
+	{ESP_LOGE(tag, "Already called"); return;}
+
+    
     initArduino();
 
 
@@ -173,13 +181,13 @@ void OTA_TCP::init()
 		
 		if (WiFi.status() != WL_CONNECTED)
 		{
-			ESP_LOGE("OTA_TCP", "Please, init OTA after WiFi is connected to STA");
+			ESP_LOGE(tag, "Please, init OTA after WiFi is connected to STA");
 			return;
 		}
 	}
 	else if (WiFi.getMode() != WIFI_AP)
 	{
-		ESP_LOGE("OTA_TCP", "Please, init OTA after WiFi STA or AP are OK");
+		ESP_LOGE(tag, "Please, init OTA after WiFi STA or AP are OK");
 		return;
 	}
 	
@@ -189,6 +197,11 @@ void OTA_TCP::init()
 
 void OTA_TCP::init(const char key[])
 {
+    const char tag[] = "OTA_TCP Crypted";
+    
+    if (exc)
+	{ESP_LOGE(tag, "Already called"); return;}
+	
     initArduino();
 
     if (WiFi.getMode() == WIFI_STA)
@@ -201,19 +214,19 @@ void OTA_TCP::init(const char key[])
 		
 		if (WiFi.status() != WL_CONNECTED)
 		{
-			ESP_LOGE("OTA_TCP", "Please, init OTA after WiFi is connected to STA");
+			ESP_LOGE(tag, "Please, init OTA after WiFi is connected to STA");
 			return;
 		}
 	}
 	else if (WiFi.getMode() != WIFI_AP)
 	{
-		ESP_LOGE("OTA_TCP", "Please, init OTA after WiFi STA or AP are OK");
+		ESP_LOGE(tag, "Please, init OTA after WiFi STA or AP are OK");
 		return;
 	}
 
 	if (strlen(key) != 16)
 	{
-		ESP_LOGE("OTA_TCP", "Invalid key length, need to be 16 chars"); return;
+		ESP_LOGE(tag, "Invalid key length, need to be 16 chars"); return;
 	}
 
 
