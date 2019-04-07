@@ -5,7 +5,7 @@ Languages:	1 - English.
 
 
 # 2. Portuguese
-* O que é?
+* O que é
 	* A biblioteca Generic OTA foi desenvolvida especialmente para o microcontrolador ESP32 com suporte de multiplas formas 		para atualizações OTA padrões (não criptografadas) ou criptografadas por AES 128 ECB. Inicialmente desenvolvida baseada na biblioteca WiFi do Arduino 	Core ou Arduino Component com ESP-IDF. Futuramente, haverá versões não dependentes do core Arduino WiFi, ou seja, utilizando apenas a LwIP.
 
 * Objetivos
@@ -20,8 +20,10 @@ Languages:	1 - English.
 		* GSM (SIM 800, SIM 900, A6).
 		* LoRa.
 		
-		
+	
 Atenção: Todas formas de atualizações precisa que o ESP32 tenha o esquema de partições OTA definido nas preferências da placa.
+
+
 
 * Procedimento para atualizações OTA TCP padrões (não criptografadas)
 	* Verifique o arquivo de exemplo `ota_default` na pasta `ota_tcp`.
