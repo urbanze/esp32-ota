@@ -8,6 +8,8 @@
 #include <mbedtls/sha256.h>
 #include <mbedtls/aes.h>
 #include <esp_ota_ops.h>
+#include <soc/rtc_wdt.h>
+#include <esp_task_wdt.h>
 
 
 
