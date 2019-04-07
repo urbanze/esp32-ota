@@ -62,13 +62,13 @@ void t_ota(void*z)
 
         tt = 0;
         t1 = esp_timer_get_time();
+	t2 = t1;
         while (1)
         {
             rtc_wdt_feed();
             esp_task_wdt_reset();
 
-            t2 = esp_timer_get_time();
-            if (t2 - t1 > 3000000)
+            if (esp_timer_get_time() - t1 > 3000000)
             {
                 tcp.printf("ESP32: Client timeout\n");
                 ESP_LOGW(tag, "Client timeout");
@@ -123,18 +123,20 @@ void t_ota(void*z)
             vTaskDelay(pdMS_TO_TICKS(2));            
         }
 
-        ESP_LOGI(tag, "Total downloaded: %d", tt);
+	float auxms = (esp_timer_get_time() - t2)/1000;
+	ESP_LOGI(tag, "Downloaded %d Bytes in %d ms (%fKB/s)", tt, int32_t(auxms), tt/auxms);
 
         err = esp_ota_end(update_handle);
-		if (err == ESP_OK)
+	if (err == ESP_OK)
         {
+
             err = esp_ota_set_boot_partition(update_partition);
             if (err == ESP_OK)
             {
                 tcp.printf("ESP32: Update sucess! Restarting...\n");
                 ESP_LOGI(tag, "Update sucess! Restarting...");
                 tcp.stop();
-                vTaskDelay(pdMS_TO_TICKS(2000));
+                vTaskDelay(pdMS_TO_TICKS(3000));
                 esp_restart();
             }
             else
