@@ -25,7 +25,7 @@ Languages:	1 - English.
 * Atenção: Todas formas de atualizações precisam que o ESP32 tenha o esquema de partições com OTA definido nas preferências da placa.
 
 
-
+# 2.1 OTA TCP
 * Procedimento para atualizações OTA TCP padrões (não criptografadas)
 	* Verifique o arquivo de exemplo `ota_default` na pasta `ota_tcp`.
 	* As atualizações OTA via TCP são enviadas ao ESP32 na porta de rede 22180.
@@ -37,7 +37,7 @@ Languages:	1 - English.
 	* 4. A partir deste momento, a biblioteca já esta monitorando a porta 22180 esperando o binário ser enviado para efetuar o download e update.
 	
 	
-* Procedimento para atualizações OTA TCP criptografas (AES 128 ECB)
+* Procedimento para atualizações OTA TCP criptografadas (AES 128 ECB)
 	* Verifique o arquivo de exemplo `ota_crypted` na pasta `ota_tcp`.
 	* As atualizações OTA criptografadas via TCP são enviadas ao ESP32 na porta de rede 22180.
 	* O binário precisa ser enviando sem qualquer byte, header ou itens adicionais, o que causaria falha na atualização por integridade corrompida.
