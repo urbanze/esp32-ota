@@ -12,16 +12,15 @@ void t_ota_http(void*z)
     else
         {strcpy(tag, "OTA_HTTP");}
     
-    WiFiServer server(80);
+    WiFiServer server(8080);
     WiFiClient tcp;
     esp_ota_handle_t update_handle = 0;
     const esp_partition_t *update_partition = NULL;
     esp_err_t err;
 
     char html[512];
-    int8_t  dwl = 0;
     uint8_t data[2048];
-    uint8_t aes_inp[16], aes_out[16];
+    //uint8_t aes_inp[16], aes_out[16];
     int32_t avl, tt;
     int64_t t1, t2;
 
@@ -36,21 +35,20 @@ void t_ota_http(void*z)
 
     
     server.begin();
-    ESP_LOGI(tag, "Ready to download update via HTTP (8080)...");
+    ESP_LOGI(tag, "Ready to download update via HTTP (http://%s:8080)...", WiFi.localIP().toString().c_str());
     while (1)
     {
         rtc_wdt_feed();
         esp_task_wdt_reset();
     
-        dwl = 0;
         if (!tcp.connected())
         {
             tcp = server.available();
-            vTaskDelay(pdMS_TO_TICKS(50));
+            vTaskDelay(pdMS_TO_TICKS(250));
             continue;
         }
 	
-	ESP_LOGW(tag, "Client connected to html");
+	ESP_LOGW(tag, "Client connected");
 	avl = tcp.available();
 	if (avl > 2048)
 	    {avl = 2048;}
@@ -64,10 +62,11 @@ void t_ota_http(void*z)
 	}
 
 
-	if (strstr(html, "GET") != NULL)
+	if (strstr(html, "GET /") != NULL)
 	{
-	    ESP_LOGI(tag, "GET Request");
-	    const char txt[] =	"<!DOCTYPE html>"
+	    //ESP_LOGI(tag, "GET Request");
+	    const char txt[] =	"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"
+				"<!DOCTYPE html>"
 				"<html lang=\"en\"><head><title>ESP32_GOTA HTTP</title>"
 				"<link rel=\"shortcut icon\" href=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAY"
 				"AAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAD2EAAA9hAag/p2kAAAAZdEVYdFNvZnR"

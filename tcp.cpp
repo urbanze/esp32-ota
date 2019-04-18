@@ -33,7 +33,7 @@ void t_ota(void*z)
     
 
     server.begin();
-    ESP_LOGI(tag, "Ready to download update in port 22180...");
+    ESP_LOGI(tag, "Ready to download update via TCP (%s:22180)...", WiFi.localIP().toString().c_str());
     while (1)
     {
         rtc_wdt_feed();
