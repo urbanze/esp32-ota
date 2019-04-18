@@ -33,7 +33,7 @@ void t_ota(void*z)
     
 
     server.begin();
-    ESP_LOGI(tag, "Ready to download update...");
+    ESP_LOGI(tag, "Ready to download update in port 22180...");
     while (1)
     {
         rtc_wdt_feed();
@@ -120,7 +120,7 @@ void t_ota(void*z)
                 t1 = esp_timer_get_time();
             }
 
-            vTaskDelay(pdMS_TO_TICKS(2));            
+            vTaskDelay(1);            
         }
 
 	float auxms = (esp_timer_get_time() - t2)/1000;
