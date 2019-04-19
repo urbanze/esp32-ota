@@ -90,6 +90,10 @@ void t_ota_http(void*z)
 
 			
 	    tcp.printf("%s\r\n", txt);
+	    vTaskDelay(pdMS_TO_TICKS(1000));
+	    tcp.printf("KKKK, NAO SEI ");
+	    vTaskDelay(pdMS_TO_TICKS(1000));
+	    tcp.printf("mas podemos testar\r\n");
 	    vTaskDelay(pdMS_TO_TICKS(5));
 	    tcp.stop();
 	}
@@ -100,8 +104,26 @@ void t_ota_http(void*z)
 	    {
 		if (data[i] == 0xE9)
 		{
-
 		    ESP_LOGW(tag, "Magic byte found in %d of %d (%d)", i, avl, avl-i);
+
+
+		    /*const char txt[] =	"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"
+					"<!DOCTYPE html>"
+					"<html lang=\"en\"><head><title>ESP32_GOTA HTTP</title>"
+					"<link rel=\"shortcut icon\" href=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAY"
+					"AAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAD2EAAA9hAag/p2kAAAAZdEVYdFNvZnR"
+					"3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAABZUlEQVQ4T52SPUsDQRCGN0aDud0zKlb+AsUqIKiFvZUgaKmgjaQSGxv"
+					"Rs1EQ94OATar019gJ2uztnidBUmopaKU29vEj51wynUI2PjDFvHPvzNyw5L8wnkx5PClj6k5J6VEqzLEn7TpKjtSaQ56"
+					"INqiwj76KllF1Ic0VpZ6FqQ0m7Ksv4nks9IZxPcGUPWfStpgwz1TGM51CoAfJ2RUlwX2hk/8iCAu+ireYNG9gTiHasPo"
+					"tNNFUmgfQn2Cji2wAOpA0zXnVpEylTbpG8w2mD2zSDWFaVMRHf073hF5iPFLQYJeJeMVXdg7++xBM7cwMU7MDLuDnPcn"
+					"5wm6C+SvbBJrWx6uNEaz1Bo5XgamfEC8Qqyg7AHeAa+9kZlj5snh6PYkVB8IwDy9sDy79zritkLUwjxUHgmAA1t6HqXf"
+					"ZO0fVkTDNM24OKLcnpK6HUXUE1oRLbzN5s4hKfzAVTY/VmiVM+4SQH2Ymn5My67oNAAAAAElFTkSuQmCC\"/>"
+					"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+					"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/></head><body>"
+
+					"Loading";
+				
+		    tcp.printf("%s", txt);*/
 		    
 
 		    avl -= i;
@@ -119,7 +141,7 @@ void t_ota_http(void*z)
 		    err = esp_ota_begin(update_partition, OTA_SIZE_UNKNOWN, &update_handle);
 		    if (err != ESP_OK)
 		    {
-			tcp.printf("ESP32: Fail[1]:%x, restarting...\n", err);
+			tcp.printf("Fail[1]:%x, restarting...\r\n</body></html>", err);
 			ESP_LOGE(tag, "Fail[1]:%x, restarting...", err);
 			tcp.stop();
 			vTaskDelay(pdMS_TO_TICKS(2000));
@@ -129,7 +151,7 @@ void t_ota_http(void*z)
 		    err = esp_ota_write(update_handle, data, avl);
 		    if (err != ESP_OK)
 		    {
-			tcp.printf("ESP32: Fail[2]:%x\n", err);
+			tcp.printf("Fail[2]:%x\r\n</body></html>", err);
 			ESP_LOGE(tag, "Fail[2]:%x", err);
 			tcp.stop();
 			break;
@@ -144,11 +166,12 @@ void t_ota_http(void*z)
 
 			if (esp_timer_get_time() - t1 > 3000000)
 			{
-			    tcp.printf("ESP32: Client timeout");
+			    tcp.printf("Client timeout\r\n</body></html>");
 			    ESP_LOGW(tag, "Client timeout");
 			    tcp.stop();
 			    break;
 			}
+			
 			
 			avl = tcp.available();
 			if (avl)
@@ -159,6 +182,7 @@ void t_ota_http(void*z)
 
 			    		    
 			    tcp.readBytes(data, avl);
+			    //tcp.printf(".");
 
 			    for (int16_t j = 0; j < avl-2; j++)
 			    {
@@ -176,7 +200,7 @@ void t_ota_http(void*z)
 			    err = esp_ota_write(update_handle, data, avl);
 			    if (err != ESP_OK)
 			    {
-				tcp.printf("ESP32: Fail[3]:%x\n", err);
+				tcp.printf("Fail[3]:%x\r\n</body></html>", err);
 				ESP_LOGE(tag, "Fail[3]:%x", err);
 				tcp.stop();
 				break;
@@ -188,8 +212,10 @@ void t_ota_http(void*z)
 			vTaskDelay(1);
 		    }
 
-		    float auxms = (esp_timer_get_time() - t2)/1000;
-		    ESP_LOGI(tag, "Downloaded %d Bytes in %d ms (%fKB/s)", tt, int32_t(auxms), tt/auxms);
+		    float auxms = (esp_timer_get_time() - t2)/1000000;
+		    auxms -= 3;
+		    
+		    ESP_LOGI(tag, "Downloaded %d Bytes in %.3fsec (%.1fKB/s)", tt, auxms, (tt/auxms/1000));
 		
 		    
 		    err = esp_ota_end(update_handle);

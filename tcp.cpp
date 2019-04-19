@@ -123,8 +123,8 @@ void t_ota(void*z)
             vTaskDelay(1);            
         }
 
-	float auxms = (esp_timer_get_time() - t2)/1000;
-	ESP_LOGI(tag, "Downloaded %d Bytes in %d ms (%fKB/s)", tt, int32_t(auxms), tt/auxms);
+	float auxms = ((esp_timer_get_time()-3000000) - t2)/1000;
+	ESP_LOGI(tag, "Downloaded %d Bytes in %d ms (%fB/s)", tt, int32_t(auxms), tt/(auxms/1000));
 
         err = esp_ota_end(update_handle);
 	if (err == ESP_OK)
