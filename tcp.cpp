@@ -70,7 +70,7 @@ void t_ota(void*z)
 
             if (esp_timer_get_time() - t1 > 3000000)
             {
-                tcp.printf("ESP32: Client timeout\n");
+                tcp.printf("ESP32: Client timeout\r\n");
                 ESP_LOGW(tag, "Client timeout");
                 break;
             }
@@ -123,8 +123,12 @@ void t_ota(void*z)
             vTaskDelay(1);            
         }
 
-	float auxms = ((esp_timer_get_time()-3000000) - t2)/1000;
-	ESP_LOGI(tag, "Downloaded %d Bytes in %d ms (%fB/s)", tt, int32_t(auxms), tt/(auxms/1000));
+	float auxms = (t1 - t2);
+	auxms /= 1000000;
+	
+
+	tcp.printf("Downloaded %d Bytes in %.3fsec (%.3fKB/s)\r\n", tt, auxms, (tt/auxms/1000));
+	ESP_LOGI(tag, "Downloaded %d Bytes in %.3fsec (%.3fKB/s)", tt, auxms, (tt/auxms/1000));
 
         err = esp_ota_end(update_handle);
 	if (err == ESP_OK)
@@ -133,7 +137,7 @@ void t_ota(void*z)
             err = esp_ota_set_boot_partition(update_partition);
             if (err == ESP_OK)
             {
-                tcp.printf("ESP32: Update sucess! Restarting...\n");
+                tcp.printf("ESP32: Update sucess! Restarting...\r\n");
                 ESP_LOGI(tag, "Update sucess! Restarting...");
                 tcp.stop();
                 vTaskDelay(pdMS_TO_TICKS(3000));
@@ -141,13 +145,13 @@ void t_ota(void*z)
             }
             else
             {
-                tcp.printf("ESP32: Fail[4]:%x\n", err);
+                tcp.printf("ESP32: Fail[4]:%x\r\n", err);
                 ESP_LOGE(tag, "Fail[4]:%x", err);
             }
         }
         else
         {
-            tcp.printf("ESP32: Fail[3]:%x\n", err);
+            tcp.printf("ESP32: Fail[3]:%x\r\n", err);
             ESP_LOGE(tag, "Fail[3]:%x", err);
         }
 
