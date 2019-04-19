@@ -19,6 +19,7 @@ class OTA_HTTP
 	public:	void init();
 			void init(const char key[]);
 
+
 };
 
 

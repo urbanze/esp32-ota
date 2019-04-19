@@ -62,193 +62,252 @@ void t_ota_http(void*z)
 	}
 
 
-	if (strstr(html, "GET /") != NULL)
+	if (strstr(html, "GET") != NULL)
 	{
-	    //ESP_LOGI(tag, "GET Request");
-	    const char txt[] =	"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"
-				"<!DOCTYPE html>"
-				"<html lang=\"en\"><head><title>ESP32_GOTA HTTP</title>"
-				"<link rel=\"shortcut icon\" href=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAY"
-				"AAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAD2EAAA9hAag/p2kAAAAZdEVYdFNvZnR"
-				"3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAABZUlEQVQ4T52SPUsDQRCGN0aDud0zKlb+AsUqIKiFvZUgaKmgjaQSGxv"
-				"Rs1EQ94OATar019gJ2uztnidBUmopaKU29vEj51wynUI2PjDFvHPvzNyw5L8wnkx5PClj6k5J6VEqzLEn7TpKjtSaQ56"
-				"INqiwj76KllF1Ic0VpZ6FqQ0m7Ksv4nks9IZxPcGUPWfStpgwz1TGM51CoAfJ2RUlwX2hk/8iCAu+ireYNG9gTiHasPo"
-				"tNNFUmgfQn2Cji2wAOpA0zXnVpEylTbpG8w2mD2zSDWFaVMRHf073hF5iPFLQYJeJeMVXdg7++xBM7cwMU7MDLuDnPcn"
-				"5wm6C+SvbBJrWx6uNEaz1Bo5XgamfEC8Qqyg7AHeAa+9kZlj5snh6PYkVB8IwDy9sDy79zritkLUwjxUHgmAA1t6HqXf"
-				"ZO0fVkTDNM24OKLcnpK6HUXUE1oRLbzN5s4hKfzAVTY/VmiVM+4SQH2Ymn5My67oNAAAAAElFTkSuQmCC\"/>"
-				"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
-				"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/></head><body>"
+	    ESP_LOGI(tag, "GET Request: %s", html);
+	    
+	    if (strstr(html, "GET /") != NULL)
+	    {
+				    
+		const char txt[] =  "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"
+				    "<!DOCTYPE html>"
+				    "<html lang=\"en\"><head><title>ESP32_GOTA HTTP</title>"
+				    "<link rel=\"shortcut icon\" href=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAY"
+				    "AAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAD2EAAA9hAag/p2kAAAAZdEVYdFNvZnR"
+				    "3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAABZUlEQVQ4T52SPUsDQRCGN0aDud0zKlb+AsUqIKiFvZUgaKmgjaQSGxv"
+				    "Rs1EQ94OATar019gJ2uztnidBUmopaKU29vEj51wynUI2PjDFvHPvzNyw5L8wnkx5PClj6k5J6VEqzLEn7TpKjtSaQ56"
+				    "INqiwj76KllF1Ic0VpZ6FqQ0m7Ksv4nks9IZxPcGUPWfStpgwz1TGM51CoAfJ2RUlwX2hk/8iCAu+ireYNG9gTiHasPo"
+				    "tNNFUmgfQn2Cji2wAOpA0zXnVpEylTbpG8w2mD2zSDWFaVMRHf073hF5iPFLQYJeJeMVXdg7++xBM7cwMU7MDLuDnPcn"
+				    "5wm6C+SvbBJrWx6uNEaz1Bo5XgamfEC8Qqyg7AHeAa+9kZlj5snh6PYkVB8IwDy9sDy79zritkLUwjxUHgmAA1t6HqXf"
+				    "ZO0fVkTDNM24OKLcnpK6HUXUE1oRLbzN5s4hKfzAVTY/VmiVM+4SQH2Ymn5My67oNAAAAAElFTkSuQmCC\"/>"
+				    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+				    "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/></head><body>"
 
-				"<form enctype=\"multipart/form-data\" action=\"\" method=\"POST\">"
-				"<input type=\"file\" name=\"file\">"
-				"<br><input type=\"submit\">"
-				"</form>"
-				
+				    "<form enctype=\"multipart/form-data\" action=\"/upload\" method=\"post\">"
+				    "Update software: "
+				    "<input type=\"file\" name=\"file\"> "
+				    "<input type=\"submit\" value=\"Send file\">"
+				    "</form><br><br>"
 
-				
-				"</body></html>";
+				    "<form action=\"/factory\" method=\"post\">"
+				    "Factory reset: "
+				    "<input type=\"submit\" value=\"Start\">"
+				    "</form>"
+				    
 
-			
-	    tcp.printf("%s\r\n", txt);
-	    vTaskDelay(pdMS_TO_TICKS(1000));
-	    tcp.printf("KKKK, NAO SEI ");
-	    vTaskDelay(pdMS_TO_TICKS(1000));
-	    tcp.printf("mas podemos testar\r\n");
-	    vTaskDelay(pdMS_TO_TICKS(5));
-	    tcp.stop();
+				    
+				    "</body></html>";
+
+			    
+		tcp.printf("%s\r\n", txt);
+		vTaskDelay(pdMS_TO_TICKS(2));
+		tcp.stop();
+	    }
 	}
-
 	else if (strstr(html, "POST") != NULL)
 	{
-	    for (int32_t i = 0; i < avl; i++)
+	    ESP_LOGI(tag, "POST Request: %s", html);
+	    
+	    const char txt[] ="HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"
+					    "<!DOCTYPE html>"
+					    "<html lang=\"en\"><head><title>ESP32_GOTA HTTP</title>"
+					    "<link rel=\"shortcut icon\" href=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAY"
+					    "AAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAD2EAAA9hAag/p2kAAAAZdEVYdFNvZnR"
+					    "3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAABZUlEQVQ4T52SPUsDQRCGN0aDud0zKlb+AsUqIKiFvZUgaKmgjaQSGxv"
+					    "Rs1EQ94OATar019gJ2uztnidBUmopaKU29vEj51wynUI2PjDFvHPvzNyw5L8wnkx5PClj6k5J6VEqzLEn7TpKjtSaQ56"
+					    "INqiwj76KllF1Ic0VpZ6FqQ0m7Ksv4nks9IZxPcGUPWfStpgwz1TGM51CoAfJ2RUlwX2hk/8iCAu+ireYNG9gTiHasPo"
+					    "tNNFUmgfQn2Cji2wAOpA0zXnVpEylTbpG8w2mD2zSDWFaVMRHf073hF5iPFLQYJeJeMVXdg7++xBM7cwMU7MDLuDnPcn"
+					    "5wm6C+SvbBJrWx6uNEaz1Bo5XgamfEC8Qqyg7AHeAa+9kZlj5snh6PYkVB8IwDy9sDy79zritkLUwjxUHgmAA1t6HqXf"
+					    "ZO0fVkTDNM24OKLcnpK6HUXUE1oRLbzN5s4hKfzAVTY/VmiVM+4SQH2Ymn5My67oNAAAAAElFTkSuQmCC\"/>"
+					    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+					    "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/></head><body>";
+				    
+	    tcp.printf("%s", txt);
+		
+	    if (strstr(html, "POST /upload HTTP") != NULL)
 	    {
-		if (data[i] == 0xE9)
+		for (int32_t i = 0; i < avl; i++)
 		{
-		    ESP_LOGW(tag, "Magic byte found in %d of %d (%d)", i, avl, avl-i);
-
-
-		    /*const char txt[] =	"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"
-					"<!DOCTYPE html>"
-					"<html lang=\"en\"><head><title>ESP32_GOTA HTTP</title>"
-					"<link rel=\"shortcut icon\" href=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAY"
-					"AAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAD2EAAA9hAag/p2kAAAAZdEVYdFNvZnR"
-					"3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAABZUlEQVQ4T52SPUsDQRCGN0aDud0zKlb+AsUqIKiFvZUgaKmgjaQSGxv"
-					"Rs1EQ94OATar019gJ2uztnidBUmopaKU29vEj51wynUI2PjDFvHPvzNyw5L8wnkx5PClj6k5J6VEqzLEn7TpKjtSaQ56"
-					"INqiwj76KllF1Ic0VpZ6FqQ0m7Ksv4nks9IZxPcGUPWfStpgwz1TGM51CoAfJ2RUlwX2hk/8iCAu+ireYNG9gTiHasPo"
-					"tNNFUmgfQn2Cji2wAOpA0zXnVpEylTbpG8w2mD2zSDWFaVMRHf073hF5iPFLQYJeJeMVXdg7++xBM7cwMU7MDLuDnPcn"
-					"5wm6C+SvbBJrWx6uNEaz1Bo5XgamfEC8Qqyg7AHeAa+9kZlj5snh6PYkVB8IwDy9sDy79zritkLUwjxUHgmAA1t6HqXf"
-					"ZO0fVkTDNM24OKLcnpK6HUXUE1oRLbzN5s4hKfzAVTY/VmiVM+4SQH2Ymn5My67oNAAAAAElFTkSuQmCC\"/>"
-					"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
-					"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/></head><body>"
-
-					"Loading";
-				
-		    tcp.printf("%s", txt);*/
-		    
-
-		    avl -= i;
-		    tt = avl;
-		    t2 = esp_timer_get_time();
-		    for (int32_t j = 0; j < avl; j++)
+		    if (data[i] == 0xE9)
 		    {
-			data[j] = data[j+i];
-		    }
-
-		    //ESP_LOGW(tag, "First 4B: [0x%x, 0x%x, 0x%x, 0x%x]", data[i], data[i+1], data[i+2], data[i+3]);
-
-		    
-		    update_partition = esp_ota_get_next_update_partition(NULL);
-		    err = esp_ota_begin(update_partition, OTA_SIZE_UNKNOWN, &update_handle);
-		    if (err != ESP_OK)
-		    {
-			tcp.printf("Fail[1]:%x, restarting...\r\n</body></html>", err);
-			ESP_LOGE(tag, "Fail[1]:%x, restarting...", err);
-			tcp.stop();
-			vTaskDelay(pdMS_TO_TICKS(2000));
-			esp_restart();
-		    }
-		    
-		    err = esp_ota_write(update_handle, data, avl);
-		    if (err != ESP_OK)
-		    {
-			tcp.printf("Fail[2]:%x\r\n</body></html>", err);
-			ESP_LOGE(tag, "Fail[2]:%x", err);
-			tcp.stop();
-			break;
-		    }
-
-		    t1 = esp_timer_get_time();
-		    while (1)
-		    {
-			rtc_wdt_feed();
-			esp_task_wdt_reset();
 			
+			ESP_LOGI(tag, "Magic Byte found in %d of %d (%d)", i, avl, avl-i);
 
-			if (esp_timer_get_time() - t1 > 3000000)
+
+		    
+
+			avl -= i;
+			tt = avl;
+			t2 = esp_timer_get_time();
+			for (int32_t j = 0; j < avl; j++)
 			{
-			    tcp.printf("Client timeout\r\n</body></html>");
-			    ESP_LOGW(tag, "Client timeout");
+			    data[j] = data[j+i];
+			}
+
+			//ESP_LOGW(tag, "First 4B: [0x%x, 0x%x, 0x%x, 0x%x]", data[i], data[i+1], data[i+2], data[i+3]);
+
+			
+			update_partition = esp_ota_get_next_update_partition(NULL);
+			err = esp_ota_begin(update_partition, OTA_SIZE_UNKNOWN, &update_handle);
+			if (err != ESP_OK)
+			{
+			    tcp.printf("Fail to start partition [0x%x], restarting...</body></html>\r\n", err);
+			    ESP_LOGE(tag, "Fail to start partition [0x%x], restarting...", err);
+			    tcp.stop();
+			    vTaskDelay(pdMS_TO_TICKS(1000));
+			    esp_restart();
+			}
+			
+			err = esp_ota_write(update_handle, data, avl);
+			if (err != ESP_OK)
+			{
+			    tcp.printf("Fail to start partition writes [0x%x]</body></html>\r\n", err);
+			    ESP_LOGE(tag, "Fail to start writes [0x%x]", err);
 			    tcp.stop();
 			    break;
 			}
-			
-			
-			avl = tcp.available();
-			if (avl)
+
+			t1 = esp_timer_get_time();
+			while (1)
 			{
-
-			    if (avl > 2048)
-				{avl = 2048;}
-
-			    		    
-			    tcp.readBytes(data, avl);
-			    //tcp.printf(".");
-
-			    for (int16_t j = 0; j < avl-2; j++)
-			    {
-				if (data[j] == '\r' && data[j+1] == '\n' && data[j+2] == '-')
-				{
-				    
-				    avl = j;
-				    break;
-				}
-			    }
-
-
+			    rtc_wdt_feed();
+			    esp_task_wdt_reset();
 			    
-			    tt += avl;
-			    err = esp_ota_write(update_handle, data, avl);
-			    if (err != ESP_OK)
+
+			    if (esp_timer_get_time() - t1 > 3000000)
 			    {
-				tcp.printf("Fail[3]:%x\r\n</body></html>", err);
-				ESP_LOGE(tag, "Fail[3]:%x", err);
-				tcp.stop();
+				ESP_LOGW(tag, "Client timeout");
 				break;
 			    }
-			    t1 = esp_timer_get_time();
+			    
+			    
+			    avl = tcp.available();
+			    if (avl)
+			    {
 
+				if (avl > 2048)
+				    {avl = 2048;}
+
+						
+				tcp.readBytes(data, avl);
+				
+
+				for (int16_t j = 0; j < avl-2; j++)
+				{
+				    if (data[j] == '\r' && data[j+1] == '\n' && data[j+2] == '-')
+				    {
+					
+					avl = j;
+					break;
+				    }
+				}
+
+
+				
+				tt += avl;
+				err = esp_ota_write(update_handle, data, avl);
+				if (err != ESP_OK)
+				{
+				    tcp.printf("Fail to write in partition [0x%x]<br>", err);
+				    ESP_LOGE(tag, "Fail to write in partition [0x%x]", err);
+				    break;
+				}
+				t1 = esp_timer_get_time();
+				
+			    }
+
+			    vTaskDelay(1);
 			}
 
-			vTaskDelay(1);
-		    }
+			float auxms = (t1 - t2);
+			auxms /= 1000000;
+			
 
-		    float auxms = (esp_timer_get_time() - t2)/1000000;
-		    auxms -= 3;
+			tcp.printf("Downloaded %d Bytes in %.3fsec (%.3fKB/s)<br>", tt, auxms, (tt/auxms/1000));
+			ESP_LOGI(tag, "Downloaded %d Bytes in %.3fsec (%.3fKB/s)", tt, auxms, (tt/auxms/1000));
 		    
-		    ESP_LOGI(tag, "Downloaded %d Bytes in %.3fsec (%.1fKB/s)", tt, auxms, (tt/auxms/1000));
-		
-		    
-		    err = esp_ota_end(update_handle);
-		    if (err == ESP_OK)
-		    {
-
-			err = esp_ota_set_boot_partition(update_partition);
+			
+			err = esp_ota_end(update_handle);
 			if (err == ESP_OK)
 			{
-			    tcp.printf("ESP32: Update sucess! Restarting...\n");
-			    ESP_LOGI(tag, "Update sucess! Restarting...");
-			    tcp.stop();
-			    vTaskDelay(pdMS_TO_TICKS(3000));
-			    esp_restart();
+			    err = esp_ota_set_boot_partition(update_partition);
+			    if (err == ESP_OK)
+			    {
+				tcp.printf("Update sucess! Restarting...</body></html>\r\n");
+				ESP_LOGI(tag, "Update sucess! Restarting...");
+				tcp.stop();
+				vTaskDelay(pdMS_TO_TICKS(1000));
+				esp_restart();
+			    }
+			    else
+			    {
+				tcp.printf("Fail to set boot partition [0x%x]</body></html>\r\n", err);
+				ESP_LOGE(tag, "Fail to set boot partition [0x%x]", err);
+			    }
 			}
 			else
 			{
-			    tcp.printf("ESP32: Fail[4]:%x\n", err);
-			    ESP_LOGE(tag, "Fail[4]:%x", err);
+			    tcp.printf("Fail to finish update [0x%x]</body></html>\r\n", err);
+			    tcp.stop();
+			    ESP_LOGE(tag, "Fail to finish update [0x%x]", err);
 			}
-		    }
-		    else
-		    {
-			tcp.printf("ESP32: Fail[5]:%x\n", err);
-			ESP_LOGE(tag, "Fail[5]:%x", err);
+
+			break;
 		    }
 
-		    break;
+		    if (i == avl-1)
+		    {
+			tcp.printf("Magic Byte 0xE9 not found, check this binary</body></html>\r\n");
+			ESP_LOGW(tag, "Magic Byte 0xE9 not found, check this binary");
+		    }
 		}
 	    }
+
+	    if (strstr(html, "POST /factory HTTP") != NULL)
+	    {
+		ESP_LOGI(tag, "Factory reseting...");
+		
+		esp_partition_iterator_t pit;
+		const esp_partition_t* fapp;
+		esp_err_t err;
+
+
+		pit = esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
+		if (pit != NULL)
+		{
+		    fapp = esp_partition_get(pit);
+		    esp_partition_iterator_release(pit);
+		    err = esp_ota_set_boot_partition(fapp);
+		    if (err != ESP_OK)
+		    {
+			tcp.printf("Fail to set factory partition [0x%x], restarting...</body></html>\r\n", err);
+			ESP_LOGE(tag, "Fail to set factory partition [0x%x], restarting...", err);
+			tcp.stop();
+			vTaskDelay(pdMS_TO_TICKS(1000));
+			esp_restart();
+		    }
+
+		    tcp.printf("Sucess! Restarting to factory app...</body></html>\r\n");
+		    ESP_LOGI(tag, "Sucess! Restarting to factory app...");
+		    tcp.stop();
+		    vTaskDelay(pdMS_TO_TICKS(1000));
+		    esp_restart();
+		}
+		else
+		{
+		    tcp.printf("Fail to find factory partition, restarting...</body></html>\r\n");
+		    ESP_LOGE(tag, "Fail to find factory partition, restarting...");
+		    tcp.stop();
+		    vTaskDelay(pdMS_TO_TICKS(1000));
+		    esp_restart();
+		}
+
+		
+	    }
+
 	}
 
-
+	
 	tcp.flush();
 	tcp.stop();
     }
