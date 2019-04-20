@@ -26,12 +26,11 @@ Languages:	1 - English.
 
 # 2.0 Instalando a biblioteca
 * 1. Baixe o .ZIP da biblioteca.
-	
-![Captura de tela de 2019-04-20 16-20-49](https://user-images.githubusercontent.com/29230962/56461440-8c7a3780-6389-11e9-8861-259fe28dd3dd.png)
-
-* 2. Na Arduino IDE, vá em (Sketch > Incluir biblioteca > Adicionar biblioteca .ZIP) e selecione o arquivo baixado.
-* 3. Na Arduino IDE, vá em (Sketch > Incluir biblioteca), procure pela biblioteca instalada e clique para inclui-la.
-
+* ![AI0](https://user-images.githubusercontent.com/29230962/56461440-8c7a3780-6389-11e9-8861-259fe28dd3dd.png)
+* 2. Na Arduino IDE, vá em (Sketch > Incluir Biblioteca > Adicionar biblioteca .ZIP) e selecione o arquivo baixado.
+* ![AI1](https://user-images.githubusercontent.com/29230962/56461552-49b95f00-638b-11e9-8e45-2d67130a721f.png)
+* 3. Na Arduino IDE, vá em (Sketch > Incluir Biblioteca), procure pela biblioteca e clique para inclui-la.
+* ![AI2](https://user-images.githubusercontent.com/29230962/56461557-605fb600-638b-11e9-87ea-fd9ac2c67297.png)
 
 
 
