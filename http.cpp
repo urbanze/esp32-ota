@@ -72,10 +72,10 @@ void OTA_HTTP::t_ota_http(void*z)
 	    if (strstr(html, "GET /") != NULL)
 	    {
 
-		char txt[2048]; char sha[64];
+		char txt[2048];// char sha[64];
 		const esp_partition_t* papp = esp_ota_get_running_partition();
-		const esp_app_desc_t *dapp = esp_ota_get_app_description();
-		esp_ota_get_app_elf_sha256(sha, 64);
+		//const esp_app_desc_t *dapp = esp_ota_get_app_description();
+		//esp_ota_get_app_elf_sha256(sha, 64);
 		
 		
 		
@@ -100,9 +100,9 @@ void OTA_HTTP::t_ota_http(void*z)
 		snprintf(txt, 2048, "<font size='5' color='black'><b>Current Device & APP info</b></font><br>"
 				    "<b>Total Free RAM:</b> %u Bytes<br>"
 				    "<b>UP-Time:</b> %lld ms<br>"
-				    "<b>Last reset reason:</b> %d<br>"
-				    "<b>APP SHA-256:</b> %s<br>"
-				    "<b>IDF Version:</b> %s<br>"
+				    "<b>Last reset reason:</b> (comming soon)<br>"
+				    "<b>APP SHA-256:</b> (comming soon)<br>"
+				    "<b>IDF Version:</b> (comming soon)<br>"
 				    "<b>Current APP:</b> %s<br>"
 
 
@@ -110,7 +110,7 @@ void OTA_HTTP::t_ota_http(void*z)
 
 
 
-				    , heap_caps_get_free_size(MALLOC_CAP_INTERNAL), int64_t(esp_timer_get_time()/1000), rtc_get_reset_reason(0), sha, dapp->idf_ver, papp->label);
+				    , heap_caps_get_free_size(MALLOC_CAP_INTERNAL), int64_t(esp_timer_get_time()/1000), papp->label);
 		tcp.printf("%s", txt);
 
 
