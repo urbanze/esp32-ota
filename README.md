@@ -41,8 +41,8 @@ Languages:	1 - English.
 
 
 * Procedimento para atualizações OTA TCP padrões (não criptografadas)
-	* Arduino IDE: Verifique o arquivo de exemplo `tcp_default.ino` na pasta `ota_tcp`.
-	* ESP-IDF: Verifique o arquivo de exemplo `idf_tcp_default.c` na pasta `ota_tcp`.
+	* Arduino IDE: Verifique o arquivo de exemplo `tcp_default.ino` na pasta `examples/ota_tcp`.
+	* ESP-IDF: Verifique o arquivo de exemplo `idf_tcp_default.c` na pasta `examples/ota_tcp`.
 	* É aconselhavel manter o DEBUG_LEVEL em `INFO` para mais informações sobre a biblioteca.
 	* As atualizações OTA via TCP são enviadas ao ESP32 na porta de rede 22180.
 	* O binário precisa ser enviado sem qualquer byte, header ou itens adicionais, o que causararia falha na atualização por 	integridade corrompida.
@@ -54,8 +54,8 @@ Languages:	1 - English.
 	
 	
 * Procedimento para atualizações OTA TCP criptografadas (AES 128 ECB)
-	* Arduino IDE: Verifique o arquivo de exemplo `tcp_crypted.ino` na pasta `ota_tcp`.
-	* ESP-IDF: Verifique o arquivo de exemplo `idf_tcp_crypted.c` na pasta `ota_tcp`.
+	* Arduino IDE: Verifique o arquivo de exemplo `tcp_crypted.ino` na pasta `examples/ota_tcp`.
+	* ESP-IDF: Verifique o arquivo de exemplo `idf_tcp_crypted.c` na pasta `examples/ota_tcp`.
 	* É aconselhavel manter o DEBUG_LEVEL em `INFO` para mais informações sobre a biblioteca.
 	* As atualizações OTA criptografadas via TCP são enviadas ao ESP32 na porta de rede 22180.
 	* O binário precisa ser enviando sem qualquer byte, header ou itens adicionais, o que causaria falha na atualização por integridade corrompida.
@@ -72,8 +72,8 @@ Languages:	1 - English.
 * Permite retornar (rollback) versões de APPS gravados no ESP32, como o ultimo OTA ou Factory APP (gravado via Serial pelo PC).
 
 * Procedimento para atualizações OTA HTTP padrões (não criptografadas)
-	* Arduino IDE: Verifique o arquivo de exemplo `http_default.ino` na pasta `ota_http`.
-	* ESP-IDF: Verifique o arquivo de exemplo `idf_http_default.c` na pasta `ota_http`.
+	* Arduino IDE: Verifique o arquivo de exemplo `http_default.ino` na pasta `examples/ota_http`.
+	* ESP-IDF: Verifique o arquivo de exemplo `idf_http_default.c` na pasta `examples/ota_http`.
 	* É aconselhavel manter o DEBUG_LEVEL em `INFO` para mais informações sobre a biblioteca.
 	* As atualizações OTA via HTTP são feitas conectando o navegador ao IP do dispositivo e porta 8080
 	* O binário precisa ser enviado sem qualquer byte, header ou itens adicionais, o que causararia falha na atualização por 	integridade corrompida.
