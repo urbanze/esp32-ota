@@ -15,14 +15,21 @@
 
 class OTA_HTTP
 {
+	private:
+			static int8_t _crypted, _exc;
+			static uint8_t _key[16];
+
+			static void t_ota_http(void*z);
+			
 
 	public:
 			void init();
 			void init(const char key[]);
-
 			
 
 };
+
+
 
 
 #endif

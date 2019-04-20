@@ -1,11 +1,12 @@
 #include "tcp.h"
 
-int8_t _crypted = 0, exc = 0;
-uint8_t _key[16];
+int8_t OTA_TCP::_exc = 0;
+int8_t OTA_TCP::_crypted = 0;
+uint8_t OTA_TCP::_key[16] = {0};
 
-void t_ota(void*z)
+void OTA_TCP::t_ota_tcp(void*z)
 {
-    exc = 1;
+    _exc = 1;
     char tag[16];
     if (_crypted)
         {strcpy(tag, "OTA_TCP Crypted");}
@@ -33,7 +34,7 @@ void t_ota(void*z)
     
 
     server.begin();
-    ESP_LOGI(tag, "Ready to download update via TCP (%s:22180)...", WiFi.localIP().toString().c_str());
+    ESP_LOGI(tag, "Ready to download news updates via TCP (%s:22180)", WiFi.localIP().toString().c_str());
     while (1)
     {
         rtc_wdt_feed();
@@ -47,14 +48,14 @@ void t_ota(void*z)
             continue;
         }
 
-        tcp.printf("ESP32: Connected, downloading...\n");
+        tcp.printf("ESP32: Connected, downloading...\r\n");
         ESP_LOGW(tag, "Client connected, downloading update");
         update_partition = esp_ota_get_next_update_partition(NULL);
         err = esp_ota_begin(update_partition, OTA_SIZE_UNKNOWN, &update_handle);
         if (err != ESP_OK)
         {
-            tcp.printf("ESP32: Fail[1]:%x, restarting...\n", err);
-            ESP_LOGE(tag, "Fail[1]:%x, restarting...", err);
+            tcp.printf("ESP32: Fail to start partition [0x%x], restarting...\r\n", err);
+	    ESP_LOGE(tag, "Fail to start partition [0x%x], restarting...", err);
             tcp.stop();
             vTaskDelay(pdMS_TO_TICKS(2000));
             esp_restart();
@@ -70,8 +71,8 @@ void t_ota(void*z)
 
             if (esp_timer_get_time() - t1 > 3000000)
             {
-                tcp.printf("ESP32: Client timeout\r\n");
-                ESP_LOGW(tag, "Client timeout");
+                tcp.printf("ESP32: Client data timeout\r\n");
+                ESP_LOGW(tag, "Client data timeout");
                 break;
             }
 
@@ -111,9 +112,8 @@ void t_ota(void*z)
                 err = esp_ota_write(update_handle, data, avl);
 				if (err != ESP_OK)
                 {
-                    tcp.printf("ESP32: Fail[2]:%x\n", err);
-                    ESP_LOGE(tag, "Fail[2]:%x", err);
-                    tcp.stop();
+                    tcp.printf("ESP32: Fail to write in partition [0x%x]\r\n", err);
+		    ESP_LOGE(tag, "Fail to write in partition [0x%x]", err);
                     break;
                 }
 
@@ -127,39 +127,41 @@ void t_ota(void*z)
 	auxms /= 1000000;
 	
 
-	tcp.printf("Downloaded %d Bytes in %.3fsec (%.3fKB/s)\r\n", tt, auxms, (tt/auxms/1000));
+	tcp.printf("ESP32: Downloaded %d Bytes in %.3fsec (%.3fKB/s)\r\n", tt, auxms, (tt/auxms/1000));
 	ESP_LOGI(tag, "Downloaded %d Bytes in %.3fsec (%.3fKB/s)", tt, auxms, (tt/auxms/1000));
 
         err = esp_ota_end(update_handle);
 	if (err == ESP_OK)
-        {
-
-            err = esp_ota_set_boot_partition(update_partition);
-            if (err == ESP_OK)
-            {
-                tcp.printf("ESP32: Update sucess! Restarting...\r\n");
-                ESP_LOGI(tag, "Update sucess! Restarting...");
-                tcp.stop();
-                vTaskDelay(pdMS_TO_TICKS(3000));
-                esp_restart();
-            }
-            else
-            {
-                tcp.printf("ESP32: Fail[4]:%x\r\n", err);
-                ESP_LOGE(tag, "Fail[4]:%x", err);
-            }
-        }
-        else
-        {
-            tcp.printf("ESP32: Fail[3]:%x\r\n", err);
-            ESP_LOGE(tag, "Fail[3]:%x", err);
-        }
+	{
+	    err = esp_ota_set_boot_partition(update_partition);
+	    if (err == ESP_OK)
+	    {
+		tcp.printf("ESP32: Update sucess! Restarting...\r\n");
+		ESP_LOGI(tag, "Update sucess! Restarting...");
+		vTaskDelay(pdMS_TO_TICKS(5));
+		tcp.stop();
+		vTaskDelay(pdMS_TO_TICKS(1000));
+		esp_restart();
+	    }
+	    else
+	    {
+		tcp.printf("ESP32: Fail to set boot partition [0x%x]\r\n", err);
+		ESP_LOGE(tag, "Fail to set boot partition [0x%x]", err);
+		vTaskDelay(pdMS_TO_TICKS(5));
+	    }
+	}
+	else
+	{
+	    tcp.printf("ESP32: Fail to finish update [0x%x]\r\n", err);
+	    ESP_LOGE(tag, "Fail to finish update [0x%x]", err);
+	    vTaskDelay(pdMS_TO_TICKS(5));
+	}
 
         tcp.stop();
     }
 
     ESP_LOGW(tag, "Task deleted");
-    exc = 0;
+    _exc = 0;
     vTaskDelete(NULL);
 }
 
@@ -170,7 +172,7 @@ void OTA_TCP::init()
 {
     const char tag[] = "OTA_TCP";
     
-    if (exc)
+    if (_exc)
 	{ESP_LOGE(tag, "Already called"); return;}
 
     
@@ -197,15 +199,15 @@ void OTA_TCP::init()
 		return;
 	}
 	
-    _crypted = 0;   
-    xTaskCreatePinnedToCore(t_ota, "t_ota", 10000, NULL, 5, NULL, tskNO_AFFINITY);
+    _crypted = 0;  
+    xTaskCreatePinnedToCore(&OTA_TCP::t_ota_tcp, "t_ota_tcp", 10000, NULL, 5, NULL, tskNO_AFFINITY);
 }
 
 void OTA_TCP::init(const char key[])
 {
     const char tag[] = "OTA_TCP Crypted";
     
-    if (exc)
+    if (_exc)
 	{ESP_LOGE(tag, "Already called"); return;}
 	
     initArduino();
@@ -242,7 +244,7 @@ void OTA_TCP::init(const char key[])
 	}
 	
     _crypted = 1;
-    xTaskCreatePinnedToCore(t_ota, "t_ota", 10000, NULL, 5, NULL, tskNO_AFFINITY);
+    xTaskCreatePinnedToCore(&OTA_TCP::t_ota_tcp, "t_ota_tcp", 10000, NULL, 5, NULL, tskNO_AFFINITY);
 }
 
 

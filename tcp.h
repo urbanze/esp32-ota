@@ -15,7 +15,14 @@
 
 class OTA_TCP
 {
+	private:
+			static int8_t _crypted, _exc;
+			static uint8_t _key[16];
 
+			static void t_ota_tcp(void*z);
+
+
+			
 	public:	void init();
 			void init(const char key[]);
 
