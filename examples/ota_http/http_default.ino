@@ -6,7 +6,7 @@
 void setup()
 {
   WiFi.mode(WIFI_STA);//WiFi in STATION mode
-  WiFi.begin("B", "");//Connect in your wifi
+  WiFi.begin("", "");//Connect in your wifi
 
   OTA_HTTP ota;//Create OTA_HTTP objetct
   ota.init();//Initialize OTA webpage in your IP and PORT 8080
