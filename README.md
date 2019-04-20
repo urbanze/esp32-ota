@@ -25,6 +25,13 @@ Languages:	1 - English.
 * Atenção: Todas formas de atualizações precisam que o ESP32 tenha o esquema de partições com OTA definido nas preferências da placa.
 
 # 2.0 Instalando a biblioteca
+* 1. Baixe o .ZIP da biblioteca.
+	
+![Captura de tela de 2019-04-20 16-20-49](https://user-images.githubusercontent.com/29230962/56461440-8c7a3780-6389-11e9-8861-259fe28dd3dd.png)
+
+* 2. Na Arduino IDE, vá em (Sketch > Incluir biblioteca > Adicionar biblioteca .ZIP) e selecione o arquivo baixado.
+* 3. Na Arduino IDE, vá em (Sketch > Incluir biblioteca), procure pela biblioteca instalada e clique para inclui-la.
+
 
 
 
