@@ -36,8 +36,9 @@ Languages:	1 - English.
 
 # 2.1 OTA TCP
 * Indicado para uso em aplicativos ou scripts de Windows, Android, Linux, MAC e etc que façam a transferência de arquivos diretamente para o `socket` sem adição de qualquer byte a mais, como NETCAT no linux.
-* Costuma ser o segundo método mais rápido, apenas abaixo do UDP.
-* Permite apenas (por enquanto) o upload de novos APPS.
+* Permite outros ESP's enviarem uma atualização para o ESP à ser atualizado, como por exemplo um ESP gateway que pode atualizar todos seus Slaves (escravos)!
+* Costuma ser o segundo método mais rápido, abaixo apenas do UDP.
+* Permite apenas (por enquanto) o upload de novos APPS, futuramente será adicionado opções de rollback.
 
 
 * Procedimento para atualizações OTA TCP padrões (não criptografadas)
