@@ -9,7 +9,7 @@ void setup()
   WiFi.begin("", "");//Connect in your wifi
 
   OTA_HTTP ota;//Create OTA_HTTP objetct
-  ota.init();//Initialize OTA webpage in your IP and PORT 8080
+  ota.init();//Initialize OTA webpage in your IP and PORT 8080 (like: 192.168.x.x:8080)
 }
 
 void loop()
