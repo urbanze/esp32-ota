@@ -9,7 +9,7 @@ void setup()
   WiFi.begin("", "");//Connect in your wifi
 
   OTA_TCP ota;//Create OTA_TCP objetct
-  ota.init();//Initialize OTA TCP in your IP and port 22180
+  ota.init();//Initialize OTA TCP in your IP and port 22180 (see Raspberry Pi sending update on tcp_img1)
 }
 
 void loop()
