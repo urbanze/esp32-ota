@@ -27,8 +27,10 @@ Languages:	1 - English.
 # 2.0 Instalando a biblioteca
 * 1. Baixe o .ZIP da biblioteca.
 * ![AI0](https://user-images.githubusercontent.com/29230962/56461440-8c7a3780-6389-11e9-8861-259fe28dd3dd.png)
+
 * 2. Na Arduino IDE, vá em (Sketch > Incluir Biblioteca > Adicionar biblioteca .ZIP) e selecione o arquivo baixado.
 * ![AI1](https://user-images.githubusercontent.com/29230962/56461552-49b95f00-638b-11e9-8e45-2d67130a721f.png)
+
 * 3. Na Arduino IDE, vá em (Sketch > Incluir Biblioteca), procure pela biblioteca e clique para inclui-la.
 * ![AI2](https://user-images.githubusercontent.com/29230962/56461557-605fb600-638b-11e9-87ea-fd9ac2c67297.png)
 
@@ -52,6 +54,7 @@ Languages:	1 - English.
 	* 2. Inicie o WiFi em STA ou AP.
 	* 3. Inicialize o OTA com o método `.init()` apenas uma vez, não coloque em loop.
 	* 4. A partir deste momento, a biblioteca já esta monitorando a porta 22180 esperando o binário ser enviado para efetuar o download e update.
+	* 5. Se você estiver em algum Sistema Operacional baseado em Linux, pode usar o NETCAT para enviar o binário diretamente de seu PC com o comando (sem aspas e parenteses) "netcat (IP) (PORTA) < (LOCAL DO ARQUIVO)", como por exemplo "netcat 192.168.4.1 22180 < Desktop/esp32.bin"
 	
 	
 * Procedimento para atualizações OTA TCP criptografadas (AES 128 ECB)
@@ -67,6 +70,7 @@ Languages:	1 - English.
 	* 2. Inicie o WiFi em STA ou AP.
 	* 3. Inicialize o OTA com o método `.init(char key[])` e insira sua chave de 16 caracteres no parâmetro da função. Faça isso apenas uma vez, não coloque em loop.
 	* 4. A partir deste momento, a biblioteca já esta monitorando a porta 22180 esperando o binário criptografado ser enviado para efetuar o download e update.
+	* 5. Se você estiver em algum Sistema Operacional baseado em Linux, pode usar o NETCAT para enviar o binário diretamente de seu PC com o comando (sem aspas e parenteses) "netcat (IP) (PORTA) < (LOCAL DO ARQUIVO)", como por exemplo "netcat 192.168.4.1 22180 < Desktop/esp32_crypted.bin"
 	
 # 2.2 OTA HTTP
 * Indicado para uso cotidiano, onde a praticidade e simplicidade governam. Mostra algumas informações úteis do dispositivo e APP atual, bastando conectar ao IP do dispositivo na porta 8080.
