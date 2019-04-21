@@ -69,13 +69,13 @@ Languages:	1 - English.
 	
 # 2.2 OTA HTTP
 * Indicado para uso cotidiano, onde a praticidade e simplicidade governam. Mostra algumas informações úteis do dispositivo e APP atual, bastando conectar ao IP do dispositivo na porta 8080.
-* Permite retornar (rollback) versões de APPS gravados no ESP32, como o ultimo OTA ou Factory APP (gravado via Serial pelo PC).
+* Permite retornar (rollback) versões de APPS gravados no ESP32, como o último OTA ou Factory APP (gravado via Serial pelo PC).
 
 * Procedimento para atualizações OTA HTTP padrões (não criptografadas)
 	* Arduino IDE: Verifique o arquivo de exemplo `http_default.ino` na pasta `examples/ota_http`.
 	* ESP-IDF: Verifique o arquivo de exemplo `idf_http_default.c` na pasta `examples/ota_http`.
 	* É aconselhavel manter o DEBUG_LEVEL em `INFO` para mais informações sobre a biblioteca.
-	* As atualizações OTA via HTTP são feitas conectando o navegador ao IP do dispositivo e porta 8080
+	* As atualizações OTA via HTTP são feitas conectando o navegador ao IP do dispositivo e porta 8080, como por exemplo "192.168.4.1:8080".
 	* O binário precisa ser enviado sem qualquer byte, header ou itens adicionais, o que causararia falha na atualização por 	integridade corrompida.
 	
 	* 1. Crie o objeto da biblioteca.
