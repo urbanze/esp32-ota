@@ -37,6 +37,8 @@ Languages:	1 - English.
 
 
 # 2.1 OTA TCP
+![tcp_img1](https://user-images.githubusercontent.com/29230962/56613239-9b145900-65ec-11e9-9c36-23bcdc50b2c2.png)
+
 * Indicado para uso em aplicativos ou scripts de Windows, Android, Linux, MAC e etc que façam a transferência de arquivos diretamente para o `socket` sem adição de qualquer byte a mais, como NETCAT no linux.
 * Permite outros ESP's enviarem uma atualização para o ESP à ser atualizado, como por exemplo um ESP gateway que pode atualizar todos seus Slaves (escravos)!
 * Costuma ser o segundo método mais rápido, abaixo apenas do UDP.
@@ -73,6 +75,8 @@ Languages:	1 - English.
 	* 5. Se você estiver em algum Sistema Operacional baseado em Linux, pode usar o NETCAT para enviar o binário diretamente de seu PC com o comando (sem aspas e parenteses) "netcat (IP) (PORTA) < (LOCAL DO ARQUIVO)", como por exemplo "netcat 192.168.4.1 22180 < Desktop/esp32_crypted.bin"
 	
 # 2.2 OTA HTTP
+![http_img1](https://user-images.githubusercontent.com/29230962/56613276-ae272900-65ec-11e9-9519-30038a99b237.jpg)
+
 * Indicado para uso cotidiano, onde a praticidade e simplicidade governam. Mostra algumas informações úteis do dispositivo e APP atual, bastando conectar ao IP do dispositivo na porta 8080.
 * Permite retornar (rollback) versões de APPS gravados no ESP32, como o último OTA ou Factory APP (gravado via Serial pelo PC).
 
