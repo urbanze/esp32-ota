@@ -17,7 +17,7 @@ class OTA_TCP
 {
 	private:
 		const char tag[8] = "OTA_TCP";
-		int8_t _cry;
+		int8_t _cry = 0;
 		mbedtls_aes_context aes;
 
 		int8_t wait(uint16_t time, TCP_CLIENT *tcp);

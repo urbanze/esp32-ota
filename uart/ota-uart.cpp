@@ -1,19 +1,28 @@
-#include "ota-tcp.h"
+#include "ota-uart.h"
 
-int8_t OTA_TCP::wait(uint16_t time, TCP_CLIENT *tcp)
+int8_t OTA_UART::wait(uint16_t time)
 {
     int64_t th = esp_timer_get_time();
+    size_t avl = 0;
+
     while (esp_timer_get_time() - th < time*1000)
     {
-        if (tcp->available()) {return 1;}
         esp_task_wdt_reset();
-        //vTaskDelay(pdMS_TO_TICKS(1));
+        uart_get_buffered_data_len(_uart, &avl);
+        if (avl > 0) {return 1;}
     }
 
     return 0;
 }
 
-void OTA_TCP::decrypt(uint8_t *data, uint16_t size)
+void OTA_UART::confirm()
+{
+    uart_write_bytes(_uart, "\r", 1);
+    uart_write_bytes(_uart, "\n", 1);
+    //uart_wait_tx_done(_uart, pdMS_TO_TICKS(25));
+}
+
+void OTA_UART::decrypt(uint8_t *data, uint16_t size)
 {
     if (_cry)
     {
@@ -35,7 +44,11 @@ void OTA_TCP::decrypt(uint8_t *data, uint16_t size)
     }
 }
 
-void OTA_TCP::iterator(TCP_CLIENT *tcp)
+
+/**
+ * @brief Read bytes sent to ESP32 and write in OTA partition.
+ */
+void OTA_UART::download()
 {
     esp_err_t err;
     int64_t t1 = 0, t2 = 0;
@@ -49,19 +62,23 @@ void OTA_TCP::iterator(TCP_CLIENT *tcp)
     if (err != ESP_OK)
     {
         ESP_LOGE(tag, "OTA begin fail [0x%x]", err);
-        tcp->stop(); return;
+        return;
     }
 
     t1 = esp_timer_get_time()/1000;
-    while (wait(2000, tcp))
+    while (wait(2000))
     {
-        uint16_t avl = tcp->available();
+        confirm();
+
+        size_t avl = 0;
+        uart_get_buffered_data_len(_uart, &avl);
+
         if (avl > 1024) {avl = 1024;}
         if (_cry && (avl%16)) {vTaskDelay(1); continue;}
 
         total += avl;
         uint8_t data[1024] = {0};
-        tcp->readBytes(data, avl);
+        uart_read_bytes(_uart, data, avl, 0);
 
         decrypt(data, avl);
 
@@ -69,7 +86,7 @@ void OTA_TCP::iterator(TCP_CLIENT *tcp)
         if (err != ESP_OK)
         {
             ESP_LOGE(tag, "OTA write fail [%x]", err);
-            tcp->stop(); return;
+            return;
         }
     }
     t2 = (esp_timer_get_time()/1000)-2000;
@@ -82,58 +99,49 @@ void OTA_TCP::iterator(TCP_CLIENT *tcp)
         if (err == ESP_OK)
         {
             ESP_LOGW(tag, "OTA OK, restarting...");
-            tcp->stop();
             esp_restart();
         }
         else
         {
             ESP_LOGE(tag, "OTA set boot partition fail [0x%x]", err);
-            tcp->stop(); return;
+            return;
         }
     }
     else
     {
         ESP_LOGE(tag, "OTA end fail [0x%x]", err);
-        tcp->stop(); return;
+        return;
     }
 }
 
-
-void OTA_TCP::download(const char *IP, uint16_t port)
+/**
+ * @brief Init UART to listening OTA upadtes.
+ * 
+ * If string (key) length == 0, crypto (AES 256 ECB) will be disabled.
+ * 
+ * @param [uart]: UART port number. (eg: UART_NUM_1)
+ * @param [baud]: UART baud rate.
+ * @param [pin_tx]: GPIO TX pin.
+ * @param [pin_rx]: GPIO RX pin.
+ * @param [*key]: AES-256 ECB decrypt key (<=32 chars).
+ */
+void OTA_UART::init(uart_port_t uart, uint32_t baud, int8_t pin_tx, int8_t pin_rx, const char key[])
 {
-    TCP_CLIENT tcp;
+    uart_config_t cfg;
+    cfg.baud_rate = baud;
+	cfg.data_bits = UART_DATA_8_BITS;
+	cfg.parity = UART_PARITY_DISABLE;
+	cfg.stop_bits = UART_STOP_BITS_1;
+	cfg.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
+	cfg.rx_flow_ctrl_thresh = 0;
+	cfg.use_ref_tick = 0;
+    _uart = uart;
 
-    if (!tcp.connecto(IP, port))
-    {
-        ESP_LOGE(tag, "Fail to connect");
-    }
-
-    ESP_LOGI(__func__, "Connected to external server");
-    OTA_TCP::iterator(&tcp);
-}
-
-void OTA_TCP::upload(uint16_t port)
-{
-    TCP_CLIENT tcp;
-    TCP_SERVER host;
-
-    host.begin(port);
-    if (!tcp.connected())
-    {
-        tcp.get_sock(host.sv(1));
-    }
-
-    if (tcp.available())
-    {
-        ESP_LOGI(__func__, "Client connected");
-        OTA_TCP::iterator(&tcp);
-    }
-}
+	uart_param_config(uart, &cfg);
+	uart_set_pin(uart, gpio_num_t(pin_tx), gpio_num_t(pin_rx), UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+	uart_driver_install(uart, 1024, 0, 0, NULL, 0);
 
 
-
-void OTA_TCP::init(const char *key)
-{
     if (strlen(key))
     {
         char key2[32] = {0};
@@ -148,6 +156,5 @@ void OTA_TCP::init(const char *key)
     {
         _cry = 0;
     }
-    
 }
 
