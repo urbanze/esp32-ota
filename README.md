@@ -1,7 +1,8 @@
 # ESP32 Generic OTA
 ESP32 OTA over many forms!\
-WiFi library: [WiFi](https://github.com/urbanze/esp32-wifi)\
-TCP library: [TCP](https://github.com/urbanze/esp32-tcp)
+Crypted functions use AES-256 ECB.
+
+WiFi library: [WiFi](https://github.com/urbanze/esp32-wifi)
 
 ## TCP Performance
 * Without Flash write and crypt OFF, can go up to 11.3Mb/s.
@@ -9,29 +10,40 @@ TCP library: [TCP](https://github.com/urbanze/esp32-tcp)
 * With Flash write, can go up to 450Kb/s.
 
 
-### Simple DOWNLOAD OTA TCP
+### Simple DOWNLOAD OTA TCP (Crypto OFF)
 Download file from external TCP server.
 ```
 WF wifi;
 OTA_TCP ota;
-wifi.sta_connect("rpi4", "1234567890");
+wifi.sta_connect("rpi4", "1234567890"); //Connect in external WiFi.
 
-ota.init("");
-ota.download("192.168.4.2", 18000);
+ota.init(""); //Init OTA TCP with crypto OFF.
+ota.download("192.168.4.2", 18000); //Download OTA hosted in '192.168.4.2:18000'
 ```
 
-### Simple UPLOAD OTA TCP
+### Simple DOWNLOAD OTA TCP (Crypto ON)
+Download file from external TCP server.
+```
+WF wifi;
+OTA_TCP ota;
+wifi.sta_connect("rpi4", "1234567890"); //Connect in external WiFi.
+
+ota.init("1234567890"); //Init OTA TCP with crypto ON.
+ota.download("192.168.4.2", 18000); //Download OTA hosted in '192.168.4.2:18000'
+```
+
+### Simple UPLOAD OTA TCP (Crypto OFF)
 Wait upload file from remote client on port 15000.
 ```
 WF wifi;
 OTA_TCP ota;
-wifi.sta_connect("rpi4", "1234567890");
+wifi.sta_connect("rpi4", "1234567890"); //Connect in external WiFi.
 
-ota.init("");
+ota.init(""); //Init OTA TCP with crypto OFF.
 
 while (1)
 {
-	ota.upload(15000);
+	ota.upload(15000); //Wait client to send OTA binary in port 15000.
 }
 ```
 
