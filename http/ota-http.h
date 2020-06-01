@@ -1,34 +1,40 @@
-#ifndef http_H
-#define http_H
+#ifndef ota_http_H
+#define ota_http_H
 
-#include <Arduino.h>
-#include <WiFi.h>
-#include <WiFiServer.h>
-#include <WiFiClient.h>
 #include <esp_err.h>
 #include <esp_log.h>
 #include <mbedtls/sha256.h>
 #include <mbedtls/aes.h>
 #include <esp_ota_ops.h>
-#include <soc/rtc_wdt.h>
-#include <soc/rtc.h>
 #include <esp_task_wdt.h>
 #include <esp_partition.h>
 
+#ifndef tcp_H
+#include "esp32-tcp/tcp.h"
+#include "esp32-tcp/tcp.cpp"
+#endif
 
 class OTA_HTTP
 {
 	private:
-			static int8_t _crypted, _exc;
-			static uint8_t _key[16];
+		const char tag[9] = "OTA_HTTP";
+		int8_t _cry = 0;
+		uint16_t _port = 80;
+		mbedtls_aes_context aes;
+		TCP_CLIENT tcp;
+		TCP_SERVER host;
 
-			static void t_ota_http(void*z);
-			
+		int8_t wait(uint16_t time);
+		void decrypt(uint8_t *data, uint16_t size);
+		int16_t first_boundary(uint8_t *data);
+		int16_t last_boundary(uint8_t *data, uint16_t size);
+		void iterator(uint8_t *data, uint16_t data_size);
+
 
 	public:
-			void init();
-			void init(const char key[]);
-			
+		void init(const char *key, uint16_t port);
+		void process();
+		
 
 };
 

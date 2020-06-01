@@ -9,9 +9,10 @@
 #include <esp_task_wdt.h>
 #include <esp_partition.h>
 
+#ifndef tcp_H
 #include "esp32-tcp/tcp.h"
 #include "esp32-tcp/tcp.cpp"
-
+#endif
 
 class OTA_TCP
 {

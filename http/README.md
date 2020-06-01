@@ -1,49 +1,29 @@
-# ESP32 Generic OTA
+# ESP32 Generic OTA (HTTP)
 ESP32 OTA over many forms!\
 Crypted functions use AES-256 ECB.
 
 WiFi library: [WiFi](https://github.com/urbanze/esp32-wifi)
 
-## TCP Performance
+## HTTP Performance
 * Without Flash write and crypt OFF, can go up to 11.3Mb/s.
 * Without Flash write and crypt ON, can go up to 7.3Mb/s.
-* With Flash write, can go up to 450Kb/s.
+* With Flash write, can go up to 570Kb/s.
 
+## How it works?
+* Basically, OTA HTTP get file (MIME MEDIA bytes) sent to ESP32 and write in OTA partition.
+* .PROCESS() will host TCP server, wait new client in HTTP web page, wait upload file and write all new incoming bytes to OTA partition.
+* This library will write **ALL BYTES** received in MIME MEDIA. After start, your external software can't send any byte that are not from the binary file.
+* If you use this library in separate task, stack of 4096B should be enough.
 
-### Simple DOWNLOAD OTA TCP (Crypto OFF)
-Download file from external TCP server.
+## Simple example to use HTTP
 ```
 WF wifi;
-OTA_TCP ota;
-wifi.sta_connect("rpi4", "1234567890"); //Connect in external WiFi.
+OTA_HTTP ota;
+wifi.sta_connect("wifi", "1234567890");
 
-ota.init(""); //Init OTA TCP with crypto OFF.
-ota.download("192.168.4.2", 18000); //Download OTA hosted in '192.168.4.2:18000'
-```
-
-### Simple DOWNLOAD OTA TCP (Crypto ON)
-Download file from external TCP server.
-```
-WF wifi;
-OTA_TCP ota;
-wifi.sta_connect("rpi4", "1234567890"); //Connect in external WiFi.
-
-ota.init("1234567890"); //Init OTA TCP with crypto ON.
-ota.download("192.168.4.2", 18000); //Download OTA hosted in '192.168.4.2:18000'
-```
-
-### Simple UPLOAD OTA TCP (Crypto OFF)
-Wait upload file from remote client on port 15000.
-```
-WF wifi;
-OTA_TCP ota;
-wifi.sta_connect("rpi4", "1234567890"); //Connect in external WiFi.
-
-ota.init(""); //Init OTA TCP with crypto OFF.
-
+ota.init(""); //Default port 80 (you can change in second param)
 while (1)
 {
-	ota.upload(15000); //Wait client to send OTA binary in port 15000.
+	ota.process(); //Wait client connection (up to 1sec) and read bytes sent by client in HTTP web page.
 }
 ```
-

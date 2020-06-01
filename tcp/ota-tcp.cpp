@@ -1,5 +1,16 @@
 #include "ota-tcp.h"
 
+/**
+ * @brief Wait any byte available.
+ * 
+ * This function return if any byte available.
+ * 
+ * @param [time]: Max milliseconds to wait.
+ * @param [*tcp]: TCP object to wait bytes.
+ * 
+ * @return [0]: None byte available in time.
+ * @return [1]: Byte available to read.
+ */
 int8_t OTA_TCP::wait(uint16_t time, TCP_CLIENT *tcp)
 {
     int64_t th = esp_timer_get_time();
@@ -13,6 +24,14 @@ int8_t OTA_TCP::wait(uint16_t time, TCP_CLIENT *tcp)
     return 0;
 }
 
+/**
+ * @brief Decrypt data received (if enabled)
+ * 
+ * This function replace all old array data (crypted) with decrypted bytes.
+ * 
+ * @param [*data]: Crypted array data.
+ * @param [size]: Size of array.
+ */
 void OTA_TCP::decrypt(uint8_t *data, uint16_t size)
 {
     if (_cry)
@@ -35,6 +54,11 @@ void OTA_TCP::decrypt(uint8_t *data, uint16_t size)
     }
 }
 
+/**
+ * @brief Process data received and manage OTA API.
+ * 
+ * @param [*tcp]: TCP object to use.
+ */
 void OTA_TCP::iterator(TCP_CLIENT *tcp)
 {
     esp_err_t err;
@@ -68,9 +92,11 @@ void OTA_TCP::iterator(TCP_CLIENT *tcp)
         err = esp_ota_write(ota_handle, data, avl);
         if (err != ESP_OK)
         {
-            ESP_LOGE(tag, "OTA write fail [%x]", err);
+            ESP_LOGE(tag, "OTA write fail [0x%x]", err);
             tcp->stop(); return;
         }
+
+        esp_task_wdt_reset();
     }
     t2 = (esp_timer_get_time()/1000)-2000;
     ESP_LOGI(tag, "Downloaded %dB in %dms", total, int32_t(t2-t1));
@@ -115,7 +141,7 @@ void OTA_TCP::download(const char *IP, uint16_t port)
         ESP_LOGE(tag, "Fail to connect");
     }
 
-    ESP_LOGI(__func__, "Connected to external server");
+    ESP_LOGI(tag, "Connected to external server");
     OTA_TCP::iterator(&tcp);
 }
 
@@ -141,7 +167,7 @@ void OTA_TCP::upload(uint16_t port)
 
     if (tcp.available())
     {
-        ESP_LOGI(__func__, "Client connected");
+        ESP_LOGI(tag, "Client connected");
         OTA_TCP::iterator(&tcp);
     }
 }

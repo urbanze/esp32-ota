@@ -1,5 +1,15 @@
 #include "ota-uart.h"
 
+/**
+ * @brief Wait any byte available.
+ * 
+ * This function return if any byte available.
+ * 
+ * @param [time]: Max milliseconds to wait.
+ * 
+ * @return [0]: None byte available in time.
+ * @return [1]: Byte available to read.
+ */
 int8_t OTA_UART::wait(uint16_t time)
 {
     int64_t th = esp_timer_get_time();
@@ -15,6 +25,9 @@ int8_t OTA_UART::wait(uint16_t time)
     return 0;
 }
 
+/**
+ * @brief Send one (confirm packet), indicating: ESP32 is ready to receive new packet.
+ */
 void OTA_UART::confirm()
 {
     uart_write_bytes(_uart, "\r", 1);
@@ -22,6 +35,14 @@ void OTA_UART::confirm()
     //uart_wait_tx_done(_uart, pdMS_TO_TICKS(25));
 }
 
+/**
+ * @brief Decrypt data received (if enabled)
+ * 
+ * This function replace all old array data (crypted) with decrypted bytes.
+ * 
+ * @param [*data]: Crypted array data.
+ * @param [size]: Size of array.
+ */
 void OTA_UART::decrypt(uint8_t *data, uint16_t size)
 {
     if (_cry)
@@ -88,6 +109,8 @@ void OTA_UART::download()
             ESP_LOGE(tag, "OTA write fail [%x]", err);
             return;
         }
+
+        esp_task_wdt_reset();
     }
     t2 = (esp_timer_get_time()/1000)-2000;
     ESP_LOGI(tag, "Downloaded %dB in %dms", total, int32_t(t2-t1));
