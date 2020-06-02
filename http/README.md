@@ -16,6 +16,7 @@ WiFi library: [WiFi](https://github.com/urbanze/esp32-wifi)
 * .PROCESS() will host TCP server, wait new client in HTTP web page, wait upload file and write all new incoming bytes to OTA partition.
 * This library will write **ALL BYTES** received in MIME MEDIA. After start, your external software can't send any byte that are not from the binary file.
 * If you use this library in separate task, stack of 4096B should be enough.
+* This library can do Factory Reset (last binary burned by USB).
 
 ## Simple example to use HTTP (Crypto OFF)
 ```
