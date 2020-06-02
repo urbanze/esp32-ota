@@ -27,8 +27,11 @@ ota.init(""); //Init OTA TCP with crypto OFF.
 ota.download("192.168.4.2", 18000); //Download OTA hosted in '192.168.4.2:18000'
 ```
 
+You can use a simple Python script to send binary file when any client connects to server.
+![image](docs/tcp_python.png)
+
 ## Simple DOWNLOAD OTA TCP (Crypto ON)
-Download file from external TCP server.
+Insert your desired key. Download file from external TCP server.
 ```
 WF wifi;
 OTA_TCP ota;
@@ -52,4 +55,5 @@ while (1)
 	ota.upload(15000); //Wait client connection (up to 1sec) and read bytes sent by client in port 15000.
 }
 ```
-
+You can send file to ESP32 with netcat and just one line. 
+![image2](docs/tcp_netcat.png)
