@@ -4,7 +4,7 @@ Crypted functions use AES-256 ECB.
 
 WiFi library: [WiFi](https://github.com/urbanze/esp32-wifi)
 
-![image](docs/http_page.png)
+![image](/docs/http_page.png)
 
 ## HTTP Performance
 * Without Flash write and crypt OFF, can go up to 11.3Mb/s.
