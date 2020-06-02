@@ -28,7 +28,7 @@ ota.download("192.168.4.2", 18000); //Download OTA hosted in '192.168.4.2:18000'
 ```
 
 You can use a simple Python script to send binary file when any client connects to server.
-![image](docs/tcp_python.png)
+![image](/docs/tcp_python.png)
 
 ## Simple DOWNLOAD OTA TCP (Crypto ON)
 Insert your desired key. Download file from external TCP server.
@@ -55,5 +55,5 @@ while (1)
 	ota.upload(15000); //Wait client connection (up to 1sec) and read bytes sent by client in port 15000.
 }
 ```
-You can send file to ESP32 with netcat and just one line. 
-![image2](docs/tcp_netcat.png)
+You can send file to ESP32 with netcat. This command send 'esp32.bin' to ESP32 in IP '192.168.9.114:18000'
+![image2](/docs/tcp_netcat.png)
