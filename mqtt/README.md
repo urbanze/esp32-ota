@@ -10,6 +10,7 @@ WiFi library: [WiFi](https://github.com/urbanze/esp32-wifi)
 * Basically, OTA MQTT get file (bytes) in specific topic that sent to ESP32 and write in OTA partition.
 * This library will write **ALL BYTES** received. After start, your external software can't send any byte that are not from the binary file.
 * If you use this library in separate task, stack of 4096B should be enough.
+* **Attention:** This library unsubscribe all topics before start download. If (only if) OTA fail, you need to subscribe all topics again. (OTA SUCESS = restart)
 
 ## Simple DOWNLOAD OTA MQTT (Crypto OFF)
 ```
