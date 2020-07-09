@@ -11,6 +11,10 @@
 #include <string.h>
 #include <mqtt_client.h>
 
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <freertos/semphr.h>
+
 
 class OTA_MQTT
 {
@@ -19,10 +23,10 @@ class OTA_MQTT
 
 		const char tag[9] = "OTA_MQTT";
 		int8_t _cry = 0;
+		static QueueHandle_t qbff;
 		mbedtls_aes_context aes;
 		esp_mqtt_client_handle_t client;
-		static int16_t received;
-		static uint8_t data[256];
+
 		
 		int8_t wait(uint16_t time);
 		void decrypt(uint8_t *data, uint16_t size);
@@ -30,7 +34,7 @@ class OTA_MQTT
 
 		
 	public:
-		void init(const char *host, const char *user, const char *pass, const char *id);
+		void init(const char *host, const char *key, const char *user, const char *pass, const char *id);
 		void download(const char *topic);
 
 };

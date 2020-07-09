@@ -1,7 +1,6 @@
 #include "ota-mqtt.h"
 
-int16_t OTA_MQTT::received = 0;
-uint8_t OTA_MQTT::data[256] = {0};
+QueueHandle_t OTA_MQTT::qbff;
 
 /**
  * @brief Process binary received from topic subscribed.
@@ -12,22 +11,17 @@ void OTA_MQTT::mqtt_events(void *handler_args, esp_event_base_t base, int32_t ev
 
     if (event_id == MQTT_EVENT_CONNECTED)
     {
-        received = 1;
+        uint8_t b = 1;
+        xQueueSend(qbff, &b, 0);
     }
     else if (event_id == MQTT_EVENT_DATA)
     {
         esp_mqtt_event_handle_t event = esp_mqtt_event_handle_t(event_data);
 
-        memcpy(data, event->data, event->data_len);
-        received = event->data_len;
-        
-        //Need to wait iterator() finish flash write to return this function.
-        int64_t th = esp_timer_get_time();
-        while (esp_timer_get_time() - th < 5000*1000)
+        for (uint16_t i = 0; i < event->data_len; i++)
         {
-            if (!received) {return;}
-            esp_task_wdt_reset();
-            vTaskDelay(pdMS_TO_TICKS(1));
+            uint8_t b = event->data[i];
+            xQueueSend(qbff, &b, pdMS_TO_TICKS(5000));
         }
     }
 }
@@ -47,9 +41,10 @@ int8_t OTA_MQTT::wait(uint16_t time)
     int64_t th = esp_timer_get_time();
     while (esp_timer_get_time() - th < time*1000)
     {
-        if (received > 0) {return 1;}
+        if (uxQueueMessagesWaiting(qbff) > 0) {return 1;}
+
         esp_task_wdt_reset();
-        vTaskDelay(pdMS_TO_TICKS(1));
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 
     return 0;
@@ -108,10 +103,17 @@ void OTA_MQTT::iterator()
     t1 = esp_timer_get_time()/1000;
     while (wait(3000))
     {
-        uint16_t avl = received;
+        uint16_t avl = uxQueueMessagesWaiting(qbff);
         if (_cry && (avl%16)) {vTaskDelay(1); continue;}
 
         total += avl;
+        uint8_t data[512] = {0};
+        for (uint16_t i = 0; i < avl; i++)
+        {
+            uint8_t b = 0;
+            xQueueReceive(qbff, &b, 0);
+            data[i] = b;
+        }
 
         decrypt(data, avl);
 
@@ -123,7 +125,6 @@ void OTA_MQTT::iterator()
         }
 
         esp_task_wdt_reset();
-        received = 0;
     }
     t2 = (esp_timer_get_time()/1000)-3000;
     ESP_LOGI(tag, "Downloaded %dB in %dms", total, int32_t(t2-t1));
@@ -159,15 +160,20 @@ void OTA_MQTT::iterator()
  */
 void OTA_MQTT::download(const char *topic)
 {
-    memset(data, 0, sizeof(data));
-    received = 0;
-
-    wait(5000);//wait connect
-    received = 0;
-    esp_mqtt_client_subscribe(client, topic, 2);
-
-    ESP_LOGI(tag, "Downloading...");
-    iterator();
+    uint8_t wait_connect = 0;
+    xQueueReset(qbff);
+    
+    if (xQueueReceive(qbff, &wait_connect, pdMS_TO_TICKS(5000)))
+    {
+        xQueueReset(qbff);
+        esp_mqtt_client_subscribe(client, topic, 2);
+        ESP_LOGI(tag, "Downloading...");
+        iterator();
+    }
+    else
+    {
+        ESP_LOGE(tag, "Fail to connect, call again...");
+    }
 }
 
 /**
@@ -181,9 +187,8 @@ void OTA_MQTT::download(const char *topic)
  * @param [*id]: Client ID. Default is 'ESP32_' + last 3B of MAC. Eg: 'ESP32_c0c549'
  * @param [*key]: AES-256 ECB decrypt key (<=32 chars).
  */
-void OTA_MQTT::init(const char *host, const char *user="", const char *pass="", const char *id="")
+void OTA_MQTT::init(const char *host, const char *key="", const char *user="", const char *pass="", const char *id="")
 {
-    char key[32] = {0};
     if (strlen(key))
     {
         char key2[32] = {0};
@@ -199,17 +204,19 @@ void OTA_MQTT::init(const char *host, const char *user="", const char *pass="", 
         _cry = 0;
     }
 
-    esp_mqtt_client_config_t mqtt_cfg;
-    memset(&mqtt_cfg, 0, sizeof(mqtt_cfg));
-    mqtt_cfg.uri = host;
-    mqtt_cfg.buffer_size = 256;
+    esp_mqtt_client_config_t cfg;
+    memset(&cfg, 0, sizeof(cfg));
+    cfg.uri = host;
+    cfg.buffer_size = 1024;
 
-    if (strlen(user)) {mqtt_cfg.username  = user;}
-    if (strlen(pass)) {mqtt_cfg.password  = pass;}
-    if (strlen(id))   {mqtt_cfg.client_id = id;}
+    if (strlen(user)) {cfg.username  = user;}
+    if (strlen(pass)) {cfg.password  = pass;}
+    if (strlen(id))   {cfg.client_id = id;}
     
-    client = esp_mqtt_client_init(&mqtt_cfg);
+    client = esp_mqtt_client_init(&cfg);
     esp_mqtt_client_register_event(client, esp_mqtt_event_id_t(ESP_EVENT_ANY_ID), mqtt_events, client);
     esp_mqtt_client_start(client);
+
+    qbff = xQueueCreate(512, sizeof(uint8_t));
 }
 

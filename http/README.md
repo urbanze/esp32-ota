@@ -1,4 +1,4 @@
-# ESP32 Generic OTA (HTTP)
+# ESP32 Ultimate OTA (HTTP)
 ESP32 OTA over many forms!\
 Crypted functions use AES-256 ECB.
 

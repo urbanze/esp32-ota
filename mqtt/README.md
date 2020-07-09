@@ -1,6 +1,6 @@
-# ESP32 Generic OTA (MQTT)
+# ESP32 Ultimate OTA (MQTT)
 ESP32 OTA over many forms!\
-Crypted functions use AES-256 ECB. (Not implemented)
+Crypted functions use AES-256 ECB.
 
 WiFi library: [WiFi](https://github.com/urbanze/esp32-wifi)
 
@@ -19,11 +19,29 @@ OTA_MQTT ota;
 wifi.sta_connect("wifi", "1234567890");
 
 
-//Without user/pass/id. Dont forget 'mqtt://' and ':port'
-ota.init("mqtt://192.168.9.114:1883");
+//Without (user/pass/id). Attention: Dont forget 'mqtt://' and ':port' in host
+ota.init("mqtt://192.168.0.101:1883");
 
-//With user/pass/id. Dont forget 'mqtt://' and ':port'
-//ota.init("mqtt://192.168.9.114:1883", "guest", "12345", "ESP32")
+//With (user/pass/id). Attention: Dont forget 'mqtt://' and ':port' in host
+//ota.init("mqtt://192.168.0.101:1883", "", "guest", "12345", "ESP32")
+
+//Download binary in topic 'ota'
+ota.download("ota");
+```
+
+## Simple DOWNLOAD OTA MQTT (Crypto ON)
+```
+WF wifi;
+OTA_MQTT ota;
+
+wifi.sta_connect("wifi", "1234567890");
+
+const char aes_key[32] = "1234567890abcdefg";
+//Without (user/pass/id). Attention: Dont forget 'mqtt://' and ':port' in host
+ota.init("mqtt://192.168.0.101:1883", aes_key);
+
+//With (user/pass/id). Attention: Dont forget 'mqtt://' and ':port' in host
+//ota.init("mqtt://192.168.0.101:1883", aes_key, "guest", "12345", "ESP32")
 
 //Download binary in topic 'ota'
 ota.download("ota");
