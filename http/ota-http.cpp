@@ -414,4 +414,3 @@ void OTA_HTTP::init(const char *key, uint16_t port=80)
 		_cry = 0;
 	}
 }
-

@@ -19,6 +19,8 @@ class OTA_TCP
 	private:
 		const char tag[8] = "OTA_TCP";
 		int8_t _cry = 0;
+		uint8_t _firstiv[16] = {0};
+		uint8_t _iv[16] = {0};
 		mbedtls_aes_context aes;
 
 		int8_t wait(uint16_t time, TCP_CLIENT *tcp);
@@ -27,7 +29,7 @@ class OTA_TCP
 
 		
 	public:
-		void init(const char key[]);
+		void crypto(const char *key, const char *iv);
 		void download(const char *IP, uint16_t port);
 		void upload(uint16_t port);
 

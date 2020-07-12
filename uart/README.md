@@ -1,6 +1,6 @@
 # ESP32 Ultimate OTA
 ESP32 OTA over many forms!\
-Crypted functions use AES-256 ECB.
+Crypted functions use AES-256 CBC.
 
 ## How it works?
 * Basically, OTA UART get file (bytes) sent to ESP32 and write in OTA partition.
@@ -13,15 +13,26 @@ Crypted functions use AES-256 ECB.
 Download file from UART.
 ```
 OTA_UART ota;
-ota.init(UART_NUM_1, 115200, 23, 22, ""); //Init UART_1 with 115000b/s in pin 23/22
-ota.download(); //Start to read new bytes and write in flash.
+
+//Init UART_1 with 115000b/s in pin 23/22
+ota.init(UART_NUM_1, 115200, 23, 22);
+
+//Start to read new bytes and write in flash.
+ota.download();
 ```
 
 ## Simple DOWNLOAD OTA UART (Crypto ON)
 Download file from UART.
 ```
 OTA_UART ota;
-ota.init(UART_NUM_1, 115200, 23, 22, "1234567890"); //Init UART_1 with 115000b/s in pin 23/22 and crypto ON
-ota.download(); //Start to read new bytes and write in flash.
+
+//Init UART_1 with 115000b/s in pin 23/22
+ota.init(UART_NUM_1, 115200, 23, 22);
+
+//Set AES-256-CBC KEY and initial IV.
+ota.crypto("12345678901234567890123456789012", "0123456789012345");
+
+//Start to read new bytes and write in flash.
+ota.download();
 ```
 

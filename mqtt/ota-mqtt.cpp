@@ -1,6 +1,7 @@
 #include "ota-mqtt.h"
 
 QueueHandle_t OTA_MQTT::qbff;
+int8_t OTA_MQTT::_connected = 0;
 
 /**
  * @brief Process binary received from topic subscribed.
@@ -11,8 +12,11 @@ void OTA_MQTT::mqtt_events(void *handler_args, esp_event_base_t base, int32_t ev
 
     if (event_id == MQTT_EVENT_CONNECTED)
     {
-        uint8_t b = 1;
-        xQueueSend(qbff, &b, 0);
+        _connected = 1;
+    }
+    else if (event_id == MQTT_EVENT_DISCONNECTED)
+    {
+        _connected = 0;
     }
     else if (event_id == MQTT_EVENT_DATA)
     {
@@ -70,7 +74,7 @@ void OTA_MQTT::decrypt(uint8_t *data, uint16_t size)
                 aes_inp[i] = (j+i > size) ? 0 : data[j+i];
             }
 
-            mbedtls_aes_crypt_ecb(&aes, MBEDTLS_AES_DECRYPT, aes_inp, aes_out);
+            mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_DECRYPT, 16, _iv, aes_inp, aes_out);
 
             for (int8_t i = 0; i < 16; i++)
             {
@@ -92,6 +96,10 @@ void OTA_MQTT::iterator()
     const esp_partition_t *ota_partition = NULL;
     ota_partition = esp_ota_get_next_update_partition(NULL);
 
+    for (uint8_t i = 0; i < 16; i++)
+    {
+        _iv[i] = _firstiv[i];
+    }
 
     err = esp_ota_begin(ota_partition, OTA_SIZE_UNKNOWN, &ota_handle);
     if (err != ESP_OK)
@@ -121,7 +129,7 @@ void OTA_MQTT::iterator()
         if (err != ESP_OK)
         {
             ESP_LOGE(tag, "OTA write fail [0x%x]", err);
-            esp_mqtt_client_unsubscribe(client, "#"); return;
+            t1 -= 3000; break;
         }
 
         esp_task_wdt_reset();
@@ -147,7 +155,14 @@ void OTA_MQTT::iterator()
     else
     {
         ESP_LOGE(tag, "OTA end fail [0x%x]", err);
+        while (wait(3000))
+        {
+            vTaskDelay(pdMS_TO_TICKS(1));
+            xQueueReset(qbff);
+        }
+
         esp_mqtt_client_unsubscribe(client, "#"); return;
+        return;
     }
 }
 
@@ -160,50 +175,69 @@ void OTA_MQTT::iterator()
  */
 void OTA_MQTT::download(const char *topic)
 {
-    uint8_t wait_connect = 0;
-    xQueueReset(qbff);
-    
-    if (xQueueReceive(qbff, &wait_connect, pdMS_TO_TICKS(5000)))
+    int64_t th = esp_timer_get_time();
+    while (esp_timer_get_time() - th < 5000*1000)
     {
-        xQueueReset(qbff);
+        if (_connected) {break;}
+
+        esp_task_wdt_reset();
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+
+    if (_connected)
+    {
         esp_mqtt_client_subscribe(client, topic, 2);
         ESP_LOGI(tag, "Downloading...");
         iterator();
+        esp_mqtt_client_reconnect(client);
     }
     else
     {
-        ESP_LOGE(tag, "Fail to connect, call again...");
+        ESP_LOGE(tag, "MQTT not connected");
+        esp_mqtt_client_reconnect(client);
     }
+}
+
+/**
+ * @brief Enable AES-256 CBC crypto.
+ * 
+ * @attention IV is modified by MBEDTLS.
+ * 
+ * @attention Key must be 32 Chars.
+ * @attention IV must be 16 Chars.
+ * 
+ * @param [*key]: AES key.
+ * @param [*iv]: Initial IV.
+ */
+void OTA_MQTT::crypto(const char *key="", const char *iv="")
+{
+    _cry = 0;
+
+    if (strlen(key) != 32) {ESP_LOGE(tag, "Key must be 32 Chars. Crypto OFF."); return;}
+    if (strlen(iv)  != 16) {ESP_LOGE(tag, "IV must be 16 Chars. Crypto OFF."); return;}
+
+
+    mbedtls_aes_init(&aes);
+    mbedtls_aes_setkey_enc(&aes, (uint8_t*)key, 256);
+    
+    for (uint8_t i = 0; i < 16; i++)
+    {
+        _firstiv[i] = iv[i];
+    }
+
+    _cry = 1;
 }
 
 /**
  * @brief Init OTA MQTT functions.
  * 
- * If [key] string length == 0, crypto (AES 256 ECB) will be disabled.
- * 
- * @param [*host]: MQTT host IP and PORT, need 'mqtt://'. Eg: 'mqtt://192.168.0.100:1883'
- * @param [*user]: User.
- * @param [*pass]: Password.
- * @param [*id]: Client ID. Default is 'ESP32_' + last 3B of MAC. Eg: 'ESP32_c0c549'
- * @param [*key]: AES-256 ECB decrypt key (<=32 chars).
+ * @param [*host]: MQTT host IP and PORT, need 'mqtt://' and ':port'. Eg: 'mqtt://192.168.0.100:1883'
+ * @param [*user]: MQTT User.
+ * @param [*pass]: MQTT Password.
+ * @param [*id]:   Client ID. Default is 'ESP32_' + last 3B of MAC. Eg: 'ESP32_c0c549'
  */
-void OTA_MQTT::init(const char *host, const char *key="", const char *user="", const char *pass="", const char *id="")
+void OTA_MQTT::init(const char *host, const char *user="", const char *pass="", const char *id="")
 {
-    if (strlen(key))
-    {
-        char key2[32] = {0};
-        _cry = 1;
-        
-        strncpy(key2, key, sizeof(key2));
-
-        mbedtls_aes_init(&aes);
-        mbedtls_aes_setkey_enc(&aes, (uint8_t*)key2, 256);
-    }
-    else
-    {
-        _cry = 0;
-    }
-
     esp_mqtt_client_config_t cfg;
     memset(&cfg, 0, sizeof(cfg));
     cfg.uri = host;

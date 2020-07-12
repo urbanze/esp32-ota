@@ -55,7 +55,7 @@ void OTA_UART::decrypt(uint8_t *data, uint16_t size)
                 aes_inp[i] = (j+i > size) ? 0 : data[j+i];
             }
 
-            mbedtls_aes_crypt_ecb(&aes, MBEDTLS_AES_DECRYPT, aes_inp, aes_out);
+            mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_DECRYPT, 16, _iv, aes_inp, aes_out);
 
             for (int8_t i = 0; i < 16; i++)
             {
@@ -78,6 +78,10 @@ void OTA_UART::download()
     const esp_partition_t *ota_partition = NULL;
     ota_partition = esp_ota_get_next_update_partition(NULL);
 
+    for (uint8_t i = 0; i < 16; i++)
+    {
+        _iv[i] = _firstiv[i];
+    }
 
     err = esp_ota_begin(ota_partition, OTA_SIZE_UNKNOWN, &ota_handle);
     if (err != ESP_OK)
@@ -138,6 +142,36 @@ void OTA_UART::download()
 }
 
 /**
+ * @brief Enable AES-256 CBC crypto.
+ * 
+ * @attention IV is modified by MBEDTLS.
+ * 
+ * @attention Key must be 32 Chars.
+ * @attention IV must be 16 Chars.
+ * 
+ * @param [*key]: AES key.
+ * @param [*iv]: Initial IV.
+ */
+void OTA_UART::crypto(const char *key="", const char *iv="")
+{
+    _cry = 0;
+
+    if (strlen(key) != 32) {ESP_LOGE(tag, "Key must be 32 Chars. Crypto OFF."); return;}
+    if (strlen(iv)  != 16) {ESP_LOGE(tag, "IV must be 16 Chars. Crypto OFF."); return;}
+
+
+    mbedtls_aes_init(&aes);
+    mbedtls_aes_setkey_enc(&aes, (uint8_t*)key, 256);
+    
+    for (uint8_t i = 0; i < 16; i++)
+    {
+        _firstiv[i] = iv[i];
+    }
+
+    _cry = 1;
+}
+
+/**
  * @brief Init UART to listening OTA upadtes.
  * 
  * If string (key) length == 0, crypto (AES 256 ECB) will be disabled.
@@ -148,7 +182,7 @@ void OTA_UART::download()
  * @param [pin_rx]: GPIO RX pin.
  * @param [*key]: AES-256 ECB decrypt key (<=32 chars).
  */
-void OTA_UART::init(uart_port_t uart, uint32_t baud, int8_t pin_tx, int8_t pin_rx, const char key[])
+void OTA_UART::init(uart_port_t uart, uint32_t baud, int8_t pin_tx, int8_t pin_rx)
 {
     uart_config_t cfg;
     cfg.baud_rate = baud;
@@ -163,21 +197,5 @@ void OTA_UART::init(uart_port_t uart, uint32_t baud, int8_t pin_tx, int8_t pin_r
 	uart_param_config(uart, &cfg);
 	uart_set_pin(uart, gpio_num_t(pin_tx), gpio_num_t(pin_rx), UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 	uart_driver_install(uart, 1024, 0, 0, NULL, 0);
-
-
-    if (strlen(key))
-    {
-        char key2[32] = {0};
-        _cry = 1;
-        
-        strncpy(key2, key, sizeof(key2));
-
-        mbedtls_aes_init(&aes);
-        mbedtls_aes_setkey_enc(&aes, (uint8_t*)key2, 256);
-    }
-    else
-    {
-        _cry = 0;
-    }
 }
 

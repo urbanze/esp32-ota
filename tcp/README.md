@@ -1,6 +1,6 @@
 # ESP32 Ultimate OTA (TCP)
 ESP32 OTA over many forms!\
-Crypted functions use AES-256 ECB.
+Crypted functions use AES-256 CBC.
 
 WiFi library: [WiFi](https://github.com/urbanze/esp32-wifi)
 
@@ -23,8 +23,8 @@ WF wifi;
 OTA_TCP ota;
 wifi.sta_connect("wifi", "1234567890"); //Connect in external WiFi.
 
-ota.init(""); //Init OTA TCP with crypto OFF.
-ota.download("192.168.4.2", 18000); //Download OTA hosted in '192.168.4.2:18000'
+//Download OTA hosted in '192.168.4.2:18000'
+ota.download("192.168.4.2", 18000);
 ```
 
 You can use a simple Python script to send binary file when any client connects to server.
@@ -37,22 +37,23 @@ WF wifi;
 OTA_TCP ota;
 wifi.sta_connect("wifi", "1234567890"); //Connect in external WiFi.
 
-ota.init("1234567890"); //Init OTA TCP with crypto ON.
-ota.download("192.168.4.2", 18000); //Download OTA hosted in '192.168.4.2:18000'
+//Set AES-256-CBC KEY and initial IV.
+ota.crypto("12345678901234567890123456789012", "0123456789012345");
+
+//Download OTA hosted in '192.168.4.2:18000'
+ota.download("192.168.4.2", 18000);
 ```
 
 ## Simple UPLOAD OTA TCP (Crypto OFF)
-Wait upload file from remote client on port 15000.
+Wait upload file from remote client on port 18000.
 ```
 WF wifi;
 OTA_TCP ota;
 wifi.sta_connect("wifi", "1234567890"); //Connect in external WiFi.
 
-ota.init(""); //Init OTA TCP with crypto OFF.
-
 while (1)
 {
-	ota.upload(15000); //Wait client connection (up to 1sec) and read bytes sent by client in port 15000.
+	ota.upload(18000); //Wait client connection (up to 1sec) and read bytes sent by client in port 18000.
 }
 ```
 You can send file to ESP32 with netcat. This command send 'esp32.bin' to ESP32 in IP '192.168.9.114:18000'

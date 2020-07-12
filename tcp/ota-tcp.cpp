@@ -44,7 +44,7 @@ void OTA_TCP::decrypt(uint8_t *data, uint16_t size)
                 aes_inp[i] = (j+i > size) ? 0 : data[j+i];
             }
 
-            mbedtls_aes_crypt_ecb(&aes, MBEDTLS_AES_DECRYPT, aes_inp, aes_out);
+            mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_DECRYPT, 16, _iv, aes_inp, aes_out);
 
             for (int8_t i = 0; i < 16; i++)
             {
@@ -68,6 +68,10 @@ void OTA_TCP::iterator(TCP_CLIENT *tcp)
     const esp_partition_t *ota_partition = NULL;
     ota_partition = esp_ota_get_next_update_partition(NULL);
 
+    for (uint8_t i = 0; i < 16; i++)
+    {
+        _iv[i] = _firstiv[i];
+    }
 
     err = esp_ota_begin(ota_partition, OTA_SIZE_UNKNOWN, &ota_handle);
     if (err != ESP_OK)
@@ -170,31 +174,36 @@ void OTA_TCP::upload(uint16_t port)
         ESP_LOGI(tag, "Client connected");
         OTA_TCP::iterator(&tcp);
     }
+
+    tcp.flush();
 }
 
 /**
- * @brief Init OTA TCP functions.
+ * @brief Enable AES-256 CBC crypto.
  * 
- * If string length == 0, crypto (AES 256 ECB) will be disabled.
+ * @attention IV is modified by MBEDTLS.
  * 
- * @param [*key]: AES-256 ECB decrypt key (<=32 chars).
+ * @attention Key must be 32 Chars.
+ * @attention IV must be 16 Chars.
+ * 
+ * @param [*key]: AES key.
+ * @param [*iv]: Initial IV.
  */
-void OTA_TCP::init(const char *key)
+void OTA_TCP::crypto(const char *key="", const char *iv="")
 {
-    if (strlen(key))
-    {
-        char key2[32] = {0};
-        _cry = 1;
-        
-        strncpy(key2, key, sizeof(key2));
+    _cry = 0;
 
-        mbedtls_aes_init(&aes);
-        mbedtls_aes_setkey_enc(&aes, (uint8_t*)key2, 256);
-    }
-    else
-    {
-        _cry = 0;
-    }
+    if (strlen(key) != 32) {ESP_LOGE(tag, "Key must be 32 Chars. Crypto OFF."); return;}
+    if (strlen(iv)  != 16) {ESP_LOGE(tag, "IV must be 16 Chars. Crypto OFF."); return;}
+
+
+    mbedtls_aes_init(&aes);
+    mbedtls_aes_setkey_enc(&aes, (uint8_t*)key, 256);
     
-}
+    for (uint8_t i = 0; i < 16; i++)
+    {
+        _firstiv[i] = iv[i];
+    }
 
+    _cry = 1;
+}

@@ -22,7 +22,10 @@ class OTA_MQTT
 		static void mqtt_events(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data);
 
 		const char tag[9] = "OTA_MQTT";
+		static int8_t _connected;
 		int8_t _cry = 0;
+		uint8_t _firstiv[16] = {0};
+		uint8_t _iv[16] = {0};
 		static QueueHandle_t qbff;
 		mbedtls_aes_context aes;
 		esp_mqtt_client_handle_t client;
@@ -34,7 +37,8 @@ class OTA_MQTT
 
 		
 	public:
-		void init(const char *host, const char *key, const char *user, const char *pass, const char *id);
+		void init(const char *host, const char *user, const char *pass, const char *id);
+		void crypto(const char *key, const char *iv);
 		void download(const char *topic);
 
 };

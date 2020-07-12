@@ -9,12 +9,15 @@
 #include <esp_task_wdt.h>
 #include <esp_partition.h>
 #include <driver/uart.h>
+#include <string.h>
 
 class OTA_UART
 {
 	private:
 		const char tag[9] = "OTA_UART";
 		int8_t _cry = 0;
+		uint8_t _firstiv[16] = {0};
+		uint8_t _iv[16] = {0};
 		mbedtls_aes_context aes;
 		uart_port_t _uart;
 
@@ -24,7 +27,8 @@ class OTA_UART
 		
 		
 	public:
-		void init(uart_port_t uart, uint32_t baud, int8_t pin_tx, int8_t pin_rx, const char key[]);
+		void init(uart_port_t uart, uint32_t baud, int8_t pin_tx, int8_t pin_rx);
+		void crypto(const char *key, const char *iv);
 		void download();
 
 };
