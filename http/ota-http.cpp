@@ -43,7 +43,7 @@ void OTA_HTTP::decrypt(uint8_t *data, uint16_t size)
                 aes_inp[i] = (j+i > size) ? 0 : data[j+i];
             }
 
-            mbedtls_aes_crypt_ecb(&aes, MBEDTLS_AES_DECRYPT, aes_inp, aes_out);
+            mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_DECRYPT, 16, _iv, aes_inp, aes_out);
 
             for (int8_t i = 0; i < 16; i++)
             {
@@ -116,6 +116,10 @@ void OTA_HTTP::iterator(uint8_t *data, uint16_t data_size)
     const esp_partition_t *ota_partition = NULL;
     ota_partition = esp_ota_get_next_update_partition(NULL);
 
+	for (uint8_t i = 0; i < 16; i++)
+    {
+        _iv[i] = _firstiv[i];
+    }
 
     err = esp_ota_begin(ota_partition, OTA_SIZE_UNKNOWN, &ota_handle);
     if (err != ESP_OK)
@@ -124,6 +128,11 @@ void OTA_HTTP::iterator(uint8_t *data, uint16_t data_size)
 		tcp.printf("OTA begin fail [0x%x]</body></html>\r\n", err);
 		return;
     }
+	else
+	{
+		ESP_LOGI(tag, "OTA Started");
+	}
+	
 
 
 	//First write comming from packet read in process()
@@ -148,14 +157,15 @@ void OTA_HTTP::iterator(uint8_t *data, uint16_t data_size)
 			//After all bytes sent, tcp.available() may not be MODULE of 16, causing infinity loop.
 			//This instructions break if this loop occurs, removing desnecessary bytes.
 			if (!th) {th = esp_timer_get_time();}
-			if (esp_timer_get_time() - th < 2000000)
+			if (esp_timer_get_time() - th > 2000000)
 			{
-				for (int16_t i = 0; i < (avl%16); i++)
-					{tcp.read();}
+				//Nothing
 			}
-
-			vTaskDelay(1);
-			continue;
+			else
+			{
+				vTaskDelay(100);
+				continue;
+			}
 		}
 
 		th = 0;//Crypted loop aux.
@@ -387,6 +397,36 @@ void OTA_HTTP::process()
 }
 
 /**
+ * @brief Enable AES-256 CBC crypto.
+ * 
+ * @attention IV is modified by MBEDTLS.
+ * 
+ * @attention Key must be 32 Chars.
+ * @attention IV must be 16 Chars.
+ * 
+ * @param [*key]: AES key.
+ * @param [*iv]: Initial IV.
+ */
+void OTA_HTTP::crypto(const char *key="", const char *iv="")
+{
+    _cry = 0;
+
+    if (strlen(key) != 32) {ESP_LOGE(tag, "Key must be 32 Chars. Crypto OFF."); return;}
+    if (strlen(iv)  != 16) {ESP_LOGE(tag, "IV must be 16 Chars. Crypto OFF."); return;}
+
+
+    mbedtls_aes_init(&aes);
+    mbedtls_aes_setkey_enc(&aes, (uint8_t*)key, 256);
+    
+    for (uint8_t i = 0; i < 16; i++)
+    {
+        _firstiv[i] = iv[i];
+    }
+
+    _cry = 1;
+}
+
+/**
  * @brief Init OTA HTTP functions.
  * 
  * If string length == 0, crypto (AES 256 ECB) will be disabled.
@@ -394,23 +434,8 @@ void OTA_HTTP::process()
  * @param [*key]: AES-256 ECB decrypt key (<=32 chars).
  * @param [port]: Port to use in HTTP web server. (eg: 8080, 80, etc)
  */
-void OTA_HTTP::init(const char *key, uint16_t port=80)
+void OTA_HTTP::init(uint16_t port=80)
 {
 	_port = port;
     host.begin(_port);
-
-    if (strlen(key))
-	{
-		char key2[32] = {0};
-        _cry = 1;
-        
-        strncpy(key2, key, sizeof(key2));
-
-        mbedtls_aes_init(&aes);
-        mbedtls_aes_setkey_enc(&aes, (uint8_t*)key2, 256);
-	}
-	else
-	{
-		_cry = 0;
-	}
 }

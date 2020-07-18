@@ -19,6 +19,8 @@ class OTA_HTTP
 	private:
 		const char tag[9] = "OTA_HTTP";
 		int8_t _cry = 0;
+		uint8_t _firstiv[16] = {0};
+		uint8_t _iv[16] = {0};
 		uint16_t _port = 80;
 		mbedtls_aes_context aes;
 		TCP_CLIENT tcp;
@@ -32,7 +34,8 @@ class OTA_HTTP
 
 
 	public:
-		void init(const char *key, uint16_t port);
+		void init(uint16_t port);
+		void crypto(const char *key, const char *iv);
 		void process();
 		
 

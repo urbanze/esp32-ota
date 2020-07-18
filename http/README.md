@@ -1,6 +1,6 @@
 # ESP32 Ultimate OTA (HTTP)
 ESP32 OTA over many forms!\
-Crypted functions use AES-256 ECB.
+Crypted functions use AES-256 CBC.
 
 WiFi library: [WiFi](https://github.com/urbanze/esp32-wifi)
 
@@ -13,32 +13,35 @@ WiFi library: [WiFi](https://github.com/urbanze/esp32-wifi)
 
 ## How it works?
 * Basically, OTA HTTP get file (MIME MEDIA bytes) sent to ESP32 and write in OTA partition.
-* .PROCESS() will host TCP server, wait new client in HTTP web page, wait upload file and write all new incoming bytes to OTA partition.
+* .PROCESS() will host HTTP/HTML server, wait new client in HTTP web page, wait upload file and write all new incoming bytes to OTA partition.
 * This library will write **ALL BYTES** received in MIME MEDIA. After start, your external software can't send any byte that are not from the binary file.
 * If you use this library in separate task, stack of 4096B should be enough.
 * This library can do Factory Reset (last binary burned by USB).
 
-## Simple example to use HTTP (Crypto OFF)
+## Simple example to use OTA HTTP (Crypto OFF)
 ```
 WF wifi;
 OTA_HTTP ota;
 wifi.ap_start("wifi", "1234567890");
 
-ota.init(""); //Default port 80 (you can change in second param)
+ota.init(); //Default port 80
 while (1)
 {
 	ota.process(); //Wait client connection (up to 1sec) and read bytes sent by client in HTTP web page.
 }
 ```
 
-## Simple example to use HTTP (Crypto ON)
+## Simple example to use OTA HTTP (Crypto ON)
 Insert your desired key.
 ```
 WF wifi;
 OTA_HTTP ota;
 wifi.ap_start("wifi", "1234567890");
 
-ota.init("1234567890"); //Default port 80 (you can change in second param)
+ota.init(); //Default port 80
+
+//Set AES-256-CBC KEY and initial IV.
+ota.crypto("12345678901234567890123456789012", "0123456789012345");
 while (1)
 {
 	ota.process(); //Wait client connection (up to 1sec) and read bytes sent by client in HTTP web page.

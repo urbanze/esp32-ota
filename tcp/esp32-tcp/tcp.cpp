@@ -200,6 +200,17 @@ int16_t TCP_CLIENT::printf(const char *format, ...)
 }
 
 /**
+ * @brief Send data over TCP connection.
+ * 
+ *  
+ * @return Data wrote.
+ */
+int16_t TCP_CLIENT::print(const char *str)
+{
+    return write((uint8_t*)str, strlen(str));
+}
+
+/**
  * @brief Read only one Byte of data available.
  * 
  * @return Data of Byte value readed.
@@ -286,7 +297,8 @@ void TCP_SERVER::begin(uint16_t port)
  * When client connect in TCP Server, this function will return immediately and
  * return instance to use in TCP_CLIENT object (read/write/etc).
  * 
- * See "How to use in "Github example in README.md
+ * See "How to use" in Github example (README.md)
+ * Attention: This function block current task.
  * 
  * @param [timeout]: Max seconds to wait client connection.
  * 
@@ -304,10 +316,11 @@ int16_t TCP_SERVER::sv(int32_t timeout)
     stv.tv_sec = timeout;
     stv.tv_usec = 0;
 
+    memset(rmt_ip, 0, sizeof(rmt_ip));
     select(max, &fds, NULL, NULL, &stv);
     if (FD_ISSET(s, &fds))
     {
-        struct sockaddr_in6 src;
+        struct sockaddr_in src;
         socklen_t src_len = sizeof(src);
 
         c = accept(s, (struct sockaddr *)&src, &src_len);
@@ -316,7 +329,17 @@ int16_t TCP_SERVER::sv(int32_t timeout)
             ESP_LOGE(tag, "Fail to accept socket connections [%d]", errno);
             close(s);
         }
+
+        inet_ntop(AF_INET, &src.sin_addr , rmt_ip, sizeof(rmt_ip));
     }
 
     return c;
+}
+
+/**
+ * @brief Get source IP from last received packet.
+ */
+char *TCP_SERVER::remoteIP()
+{
+    return rmt_ip;
 }

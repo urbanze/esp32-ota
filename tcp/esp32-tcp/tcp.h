@@ -71,6 +71,7 @@ class TCP_CLIENT
 
 		int16_t write(uint8_t *data, uint16_t size);
 		int16_t printf(const char *format, ...);
+		int16_t print(const char *str);
 
 		uint8_t read();
 		void readBytes(uint8_t *bff, uint16_t size);
@@ -83,12 +84,15 @@ class TCP_SERVER
 	private:
 		const char tag[11] = "TCP_SERVER";
 		int s = 0;
+		char rmt_ip[16] = {0};
 
 	public:
 		~TCP_SERVER();
 
 		void begin(uint16_t port);
 		int16_t sv(int32_t timeout);
+		char *remoteIP();
+
 };
 
 
