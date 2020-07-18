@@ -19,7 +19,7 @@
 class OTA_MQTT
 {
 	private:
-		static void mqtt_events(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data);
+		static esp_err_t mqtt_events(esp_mqtt_event_handle_t event);
 
 		const char tag[9] = "OTA_MQTT";
 		static int8_t _connected;

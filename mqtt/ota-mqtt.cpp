@@ -6,28 +6,28 @@ int8_t OTA_MQTT::_connected = 0;
 /**
  * @brief Process binary received from topic subscribed.
  */
-void OTA_MQTT::mqtt_events(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
+esp_err_t OTA_MQTT::mqtt_events(esp_mqtt_event_handle_t event)
 {
-    //ESP_LOGI(__func__, "%d", event_id);
+    //ESP_LOGI(__func__, "%d", event->event_id);
 
-    if (event_id == MQTT_EVENT_CONNECTED)
+    if (event->event_id == MQTT_EVENT_CONNECTED)
     {
         _connected = 1;
     }
-    else if (event_id == MQTT_EVENT_DISCONNECTED)
+    else if (event->event_id == MQTT_EVENT_DISCONNECTED)
     {
         _connected = 0;
     }
-    else if (event_id == MQTT_EVENT_DATA)
+    else if (event->event_id == MQTT_EVENT_DATA)
     {
-        esp_mqtt_event_handle_t event = esp_mqtt_event_handle_t(event_data);
-
         for (uint16_t i = 0; i < event->data_len; i++)
         {
             uint8_t b = event->data[i];
             xQueueSend(qbff, &b, pdMS_TO_TICKS(5000));
         }
     }
+
+    return ESP_OK;
 }
 
 /**
@@ -242,13 +242,13 @@ void OTA_MQTT::init(const char *host, const char *user="", const char *pass="", 
     memset(&cfg, 0, sizeof(cfg));
     cfg.uri = host;
     cfg.buffer_size = 1024;
+    cfg.event_handle = mqtt_events;
 
     if (strlen(user)) {cfg.username  = user;}
     if (strlen(pass)) {cfg.password  = pass;}
     if (strlen(id))   {cfg.client_id = id;}
     
     client = esp_mqtt_client_init(&cfg);
-    esp_mqtt_client_register_event(client, esp_mqtt_event_id_t(ESP_EVENT_ANY_ID), mqtt_events, client);
     esp_mqtt_client_start(client);
 
     qbff = xQueueCreate(512, sizeof(uint8_t));
