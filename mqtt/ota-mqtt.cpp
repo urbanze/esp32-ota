@@ -189,12 +189,12 @@ void OTA_MQTT::download(const char *topic)
         esp_mqtt_client_subscribe(client, topic, 2);
         ESP_LOGI(tag, "Downloading...");
         iterator();
-        esp_mqtt_client_reconnect(client);
+        esp_mqtt_client_stop(client);
     }
     else
     {
         ESP_LOGE(tag, "MQTT not connected");
-        esp_mqtt_client_reconnect(client);
+        esp_mqtt_client_stop(client);
     }
 }
 
