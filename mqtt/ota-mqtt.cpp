@@ -17,13 +17,18 @@ esp_err_t OTA_MQTT::mqtt_events(esp_mqtt_event_handle_t event)
     else if (event->event_id == MQTT_EVENT_DISCONNECTED)
     {
         _connected = 0;
+        xQueueReset(qbff);
     }
     else if (event->event_id == MQTT_EVENT_DATA)
     {
         for (uint16_t i = 0; i < event->data_len; i++)
         {
             uint8_t b = event->data[i];
-            xQueueSend(qbff, &b, pdMS_TO_TICKS(5000));
+            if (xQueueSend(qbff, &b, pdMS_TO_TICKS(5000)) == pdFALSE)
+            {
+                ESP_LOGE(__func__, "Data ERROR");
+                esp_restart();
+            }
         }
     }
 
@@ -105,7 +110,7 @@ void OTA_MQTT::iterator()
     if (err != ESP_OK)
     {
         ESP_LOGE(tag, "OTA begin fail [0x%x]", err);
-        esp_mqtt_client_unsubscribe(client, "#"); return;
+        return;
     }
 
     t1 = esp_timer_get_time()/1000;
@@ -132,6 +137,7 @@ void OTA_MQTT::iterator()
             t1 -= 3000; break;
         }
 
+        if (total % 51200 <= 500) {ESP_LOGI(tag, "Downloaded %dB", total);}
         esp_task_wdt_reset();
     }
     t2 = (esp_timer_get_time()/1000)-3000;
@@ -149,7 +155,6 @@ void OTA_MQTT::iterator()
         else
         {
             ESP_LOGE(tag, "OTA set boot partition fail [0x%x]", err);
-            esp_mqtt_client_unsubscribe(client, "#"); return;
         }
     }
     else
@@ -160,9 +165,6 @@ void OTA_MQTT::iterator()
             vTaskDelay(pdMS_TO_TICKS(1));
             xQueueReset(qbff);
         }
-
-        esp_mqtt_client_unsubscribe(client, "#"); return;
-        return;
     }
 }
 
@@ -175,6 +177,8 @@ void OTA_MQTT::iterator()
  */
 void OTA_MQTT::download(const char *topic)
 {
+    esp_mqtt_client_start(client);
+
     int64_t th = esp_timer_get_time();
     while (esp_timer_get_time() - th < 5000*1000)
     {
@@ -186,9 +190,11 @@ void OTA_MQTT::download(const char *topic)
 
     if (_connected)
     {
-        esp_mqtt_client_subscribe(client, topic, 2);
+        esp_mqtt_client_subscribe(client, topic, 0);
         ESP_LOGI(tag, "Downloading...");
-        iterator();
+        iterator(); //If OTA OK, library will restart().
+
+        ESP_LOGE(tag, "Downloading FAIL");
         esp_mqtt_client_stop(client);
     }
     else
@@ -249,8 +255,6 @@ void OTA_MQTT::init(const char *host, const char *user="", const char *pass="", 
     if (strlen(id))   {cfg.client_id = id;}
     
     client = esp_mqtt_client_init(&cfg);
-    esp_mqtt_client_start(client);
-
     qbff = xQueueCreate(512, sizeof(uint8_t));
 }
 
