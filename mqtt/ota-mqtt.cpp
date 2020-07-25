@@ -171,8 +171,6 @@ void OTA_MQTT::iterator()
 /**
  * @brief Subscribe to MQTT topic and download binary.
  * 
- * @attention This library unsubscribe ALL others topics before start. You need to reopen topics if OTA fail.
- * 
  * @param [*topic]: MQTT topic containing binary.
  */
 void OTA_MQTT::download(const char *topic)
