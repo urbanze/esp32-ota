@@ -21,9 +21,10 @@ WiFi library: [WiFi](https://github.com/urbanze/esp32-wifi)
 ## Simple example to use OTA HTTP (Crypto OFF)
 ```
 WF wifi;
-OTA_HTTP ota;
 wifi.ap_start("wifi", "1234567890");
 
+
+OTA_HTTP ota;
 ota.init(); //Default port 80
 while (1)
 {
@@ -35,9 +36,10 @@ while (1)
 Insert your desired key.
 ```
 WF wifi;
-OTA_HTTP ota;
 wifi.ap_start("wifi", "1234567890");
 
+
+OTA_HTTP ota;
 ota.init(); //Default port 80
 
 //Set AES-256-CBC KEY and initial IV.

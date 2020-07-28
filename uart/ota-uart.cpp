@@ -114,6 +114,7 @@ void OTA_UART::download()
             return;
         }
 
+        if (total % 51200 <= 500) {ESP_LOGI(tag, "Downloaded %dB", total);}
         esp_task_wdt_reset();
     }
     t2 = (esp_timer_get_time()/1000)-2000;

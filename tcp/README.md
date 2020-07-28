@@ -34,8 +34,10 @@ You can use a simple Python script to send binary file when any client connects 
 Insert your desired key. Download file from external TCP server.
 ```
 WF wifi;
-OTA_TCP ota;
 wifi.sta_connect("wifi", "1234567890"); //Connect in external WiFi.
+
+
+OTA_TCP ota;
 
 //Set AES-256-CBC KEY and initial IV.
 ota.crypto("12345678901234567890123456789012", "0123456789012345");
@@ -48,9 +50,9 @@ ota.download("192.168.4.2", 18000);
 Wait upload file from remote client on port 18000.
 ```
 WF wifi;
-OTA_TCP ota;
 wifi.sta_connect("wifi", "1234567890"); //Connect in external WiFi.
 
+OTA_TCP ota;
 while (1)
 {
 	ota.upload(18000); //Wait client connection (up to 1sec) and read bytes sent by client in port 18000.

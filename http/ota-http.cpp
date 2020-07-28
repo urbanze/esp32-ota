@@ -187,6 +187,7 @@ void OTA_HTTP::iterator(uint8_t *data, uint16_t data_size)
             return;
         }
 
+		if (total % 51200 <= 500) {ESP_LOGI(tag, "Downloaded %dB", total);}
 		esp_task_wdt_reset();
 
 		if (file_end > -1) {break;}
