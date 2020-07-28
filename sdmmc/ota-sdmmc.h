@@ -39,9 +39,9 @@ class OTA_SDMMC
 
 
 	public:
-		int8_t init(const char *base_path);
+		int8_t init(const char *file_path, const char *base_path);
 		void crypto(const char *key, const char *iv);
-		void download(const char *file);
+		void download();
 
 };
 

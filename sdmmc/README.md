@@ -23,9 +23,9 @@ This library use SDMMC_SLOT_1 with internal PULL-UPs. You may need to put extern
 OTA_SDMMC ota;
 
 //Init SD card
-if (ota.init())
+if (ota.init("esp32.bin"))
 {
-    ota.download("esp32.bin"); //Download file esp32.bin (root)
+    ota.download(); //Download file esp32.bin (default root is /sdcard)
 }
 ```
 
@@ -34,12 +34,12 @@ if (ota.init())
 OTA_SDMMC ota;
 
 //Init SD card
-if (ota.init())
+if (ota.init("cbc.bin"))
 {
     //Set AES-256-CBC Key and IV.
     ota.crypto("12345678901234567890123456789012", "0123456789012345");
 
-    //Download file cbc.bin (root)
-    ota.download("cbc.bin");
+    //Download file cbc.bin (default root is /sdcard)
+    ota.download();
 }
 ```

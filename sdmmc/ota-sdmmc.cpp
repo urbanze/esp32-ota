@@ -84,6 +84,8 @@ void OTA_SDMMC::iterator()
             ESP_LOGI(tag, "Read end"); break;
         }
 
+
+        if (total % 51200 <= 500) {ESP_LOGI(tag, "Downloaded %dB", total);}
         esp_task_wdt_reset();
     }
     t2 = (esp_timer_get_time()/1000);
@@ -111,24 +113,11 @@ void OTA_SDMMC::iterator()
 }
 
 /**
- * @brief Download specific file from SD card.
- * 
- * @param [*file]: file path.
+ * @brief Download file from SD card.
  */
-void OTA_SDMMC::download(const char *file)
+void OTA_SDMMC::download()
 {
-    char path[64] = {0};
-    snprintf(path, 64, "/sdcard/%s", file);
-
-    f = fopen(path, "rb");
-    if (f != NULL)
-    {
-        iterator();
-    }
-    else
-    {
-        ESP_LOGE(tag, "Fail to open file (%d)", errno);
-    }
+    iterator();
 }
 
 /**
@@ -162,14 +151,18 @@ void OTA_SDMMC::crypto(const char *key="", const char *iv="")
 }
 
 /**
- * @brief Init SD Card
+ * @brief Init SD Card and detect file
  * 
+ * @param [*file_path]: File path.
  * @param [*base_path]: Base path of sdcard. Default is '/sdcard'
+ * 
+ * Eg: if file [esp32.bin] is at root of SD, [file_path] = esp32.bin
+ * Eg: if file [ota.bin] is at folder [ota/esp32/], [file_path] = ota/esp32/ota.bin
  * 
  * @return 0: Fail.
  * @return 1: Sucess.
  */
-int8_t OTA_SDMMC::init(const char *base_path="/sdcard")
+int8_t OTA_SDMMC::init(const char *file_path, const char *base_path="/sdcard")
 {
     esp_err_t err;
     sdmmc_host_t host = SDMMC_HOST_DEFAULT();
@@ -202,7 +195,19 @@ int8_t OTA_SDMMC::init(const char *base_path="/sdcard")
         return 0;
     }
 
-    //sdmmc_card_print_info(stdout, sd);
-    return 1;
+    char full_path[64] = {0};
+    snprintf(full_path, 64, "%s/%s", base_path, file_path);
+
+    f = fopen(full_path, "rb");
+    if (f != NULL)
+    {
+        return 1;
+    }
+    else
+    {
+        ESP_LOGE(tag, "Fail to open file [%s] (%d)", full_path, errno);
+    }
+
+    return 0;
 }
 
