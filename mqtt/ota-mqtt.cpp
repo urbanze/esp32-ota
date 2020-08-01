@@ -24,7 +24,7 @@ esp_err_t OTA_MQTT::mqtt_events(esp_mqtt_event_handle_t event)
         for (uint16_t i = 0; i < event->data_len; i++)
         {
             uint8_t b = event->data[i];
-            if (xQueueSend(qbff, &b, pdMS_TO_TICKS(5000)) == pdFALSE)
+            if (xQueueSend(qbff, &b, pdMS_TO_TICKS(6000)) == pdFALSE)
             {
                 ESP_LOGE(__func__, "Data ERROR");
                 esp_restart();
@@ -114,7 +114,7 @@ void OTA_MQTT::iterator()
     }
 
     t1 = esp_timer_get_time()/1000;
-    while (wait(3000))
+    while (wait(5000))
     {
         uint16_t avl = uxQueueMessagesWaiting(qbff);
         if (_cry && (avl%16)) {vTaskDelay(1); continue;}
@@ -140,7 +140,7 @@ void OTA_MQTT::iterator()
         if (total % 51200 <= 500) {ESP_LOGI(tag, "Downloaded %dB", total);}
         esp_task_wdt_reset();
     }
-    t2 = (esp_timer_get_time()/1000)-3000;
+    t2 = (esp_timer_get_time()/1000)-5000;
     ESP_LOGI(tag, "Downloaded %dB in %dms", total, int32_t(t2-t1));
 
     err = esp_ota_end(ota_handle);
